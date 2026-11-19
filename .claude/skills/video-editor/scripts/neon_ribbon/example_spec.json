@@ -1,0 +1,16 @@
+{
+  "zooms": [[0, 1.0], [2.6, 1.12], [5.6, 1.0], [8.8, 1.1]],
+  "ribbon": [[0.0, 5.4, {"in": 1.1}], [8.8, 11.3, {"in": 0.9, "phase": 2.0, "turns": 1.1}]],
+  "keywords": [
+    {"t0": 0.6, "t1": 2.5, "big": "Where", "small": ["to find"], "small_pos": [[1, 1]], "size": 250, "y": 1230}
+  ],
+  "cards": [
+    {"t0": 2.8, "t1": 5.4, "items": [["pin", "Location"], ["house", "Property"], ["search", "Search"]], "y": 1440}
+  ],
+  "pills": [{"t0": 2.9, "t1": 5.4, "text": "where to find", "y": 1130}],
+  "circle": [
+    {"t0": 5.6, "t1": 8.8, "ring": "WHERE TO FIND  •  WHERE TO FIND  •  ", "pill": "where to find", "items": [["gavel", "Auction"], ["doc", "Listing"], ["web", "Online"]]}
+  ],
+  "bars": [[8.9, 11.3, 1560]],
+  "snaps": [1.4, 3.8, 6.8, 10.0]
+}
