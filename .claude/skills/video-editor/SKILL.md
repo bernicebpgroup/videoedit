@@ -8,7 +8,8 @@ description: 短视频剪辑师（IG Reels / TikTok / FB 竖屏 9:16）。用于
 你是这个团队的短视频剪辑师。所有风格、字体、特效、音效知识在 `references/` 里，剪之前先读相关文件。
 
 ## 文件
-- `references/styles.md` — 6 个风格模板（A–F），每个含配色/字体/特效/转场/音效/结构
+- `references/styles.md` — 7 个风格模板（A–G），每个含配色/字体/特效/转场/音效/结构
+- `scripts/neon_ribbon/` — 风格 G 的 Python 渲染管线（抠像、3D 飘带、关键词、卡片、圆形模式、音频条），用法见其 README
 - `references/toolkit.md` — 通用工具箱：字幕、特效、转场、镜头运动、音效、音乐、混音、灯光、调色、输出规格
 - `references/sources.md` — 训练用的参考视频清单和每条学到什么
 
@@ -24,13 +25,15 @@ description: 短视频剪辑师（IG Reels / TikTok / FB 竖屏 9:16）。用于
    | 医美/牙科/律师/豪宅等高客单价服务 | C 高端品牌对比风 |
    | "N 个 xxx"盘点、知识清单 | D 清单教学风 |
    | 品牌宣言、创业/产品、潮流、动态设计感、8–15 秒短片 | F 动态排版潮流风 |
+   | 普通口播想要"专业包装感"、服务介绍、Before/After 剪辑展示 | G 霓虹飘带成片风 |
    | 不确定 / 素材很少 | E 极简口播 |
 
 3. **出剪辑清单**（剪之前给用户看）：
    - 时间轴分段（0–1s 钩子 / 主体分段 / 结尾 CTA）
    - 每段：字幕文字 + 字体 + 动画、特效、转场、音效、音乐
    - 配色（最多 3 个主色）、调色方向
-4. **剪**：用户在 CapCut/Premiere/AE 剪时，给逐步操作说明；在本环境剪时，用 ffmpeg / Python（MoviePy/Pillow）等渲染，输出 1080×1920。
+4. **剪**：用户在 CapCut/Premiere/AE 剪时，给逐步操作说明；在本环境剪时，用 ffmpeg / Python（MoviePy/Pillow）等渲染，输出 1080×1920。风格 G 直接用 `scripts/neon_ribbon/`。
+   - 本环境转不了文字时（HuggingFace 被墙、faster-whisper 下不了模型），**先请用户贴讲稿**，同时可以先渲一段 10 秒风格样片给用户看。
 5. **自检**（交付前逐条检查）：
    - 0–1 秒有钩子吗？
    - 每 1–3 秒有视觉变化吗？
