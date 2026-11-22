@@ -12,6 +12,17 @@ Google Drive 文件 ID：`1xXeRe2I0kUsYucmDgswK-1PSRGvoje-i`（360MB，51.8 秒�
     mkdir -p models && curl -sSfL -o models/selfie_multiclass_256x256.tflite \
       https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite
 
+## 粗字体（fx.py 用，OFL 开源字体，不进 git）
+    mkdir -p fonts && cd fonts
+    for f in "ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf" "ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf" \
+             "ofl/zcoolqingkehuangyou/ZCOOLQingKeHuangYou-Regular.ttf" "ofl/mashanzheng/MaShanZheng-Regular.ttf"; do
+      curl -sSfL -o "$(basename "$f" | sed 's/%5B/[/;s/%5D/]/')" "https://raw.githubusercontent.com/google/fonts/main/$f"; done
+    python3 -c "from fontTools.ttLib import TTFont; from fontTools.varLib.instancer import instantiateVariableFont as I
+    for s,d,w in [('NotoSerifSC[wght].ttf','NotoSerifSC-Black.ttf',900),('NotoSansSC[wght].ttf','NotoSansSC-Black.ttf',900),('NotoSansSC[wght].ttf','NotoSansSC-Medium.ttf',500)]:
+        f=TTFont(s); I(f,{'wght':w},inplace=True); f.save(d)"
+    cd ..
+（可变字体要先固定成静态粗细再用，直接在 Pillow 里切换粗细不稳定）
+
 ## 运行（在放 src2/ 和 frames/ 的工作目录里）
     cp -r tools/reel/frames .   # shot.png = 手机价格截图（已裁剪拉直）
     python3 tools/reel/preview.py $(pwd)/tools/reel previews/x.jpg 2 "13.5,14.9,33.4"   # 预览帧
@@ -27,5 +38,6 @@ Google Drive 文件 ID：`1xXeRe2I0kUsYucmDgswK-1PSRGvoje-i`（360MB，51.8 秒�
 - 字幕/卡片入场改成**弹簧弹跳**（`spring()`：阻尼比 0.45、3.5Hz，冲过头约 20%，0.4s 停住），学自风格 H
 - **字在人后**：`El(..., behind=True)` 的元素画在背景和人之间（MediaPipe 人像分割，每帧抠图 + 羽化 + 时间平滑）。用在 1.0s「得标！」和 47.2s「50%」
 - **字幕风格 I（高级感）**：所有字无描边，只有淡柔光阴影；一句只放重点 `stack()`（小字细宋体 + 大字粗宋体，居中）；其他话用 `words()` 细字半透明逐段出；毛玻璃卡片 `Glass` / `glass_label()` + `icon()`；幽灵大字「280」「经营者」半透明放人后
+- `fx.py`（待用户选）：`text2()` 深色阴影 + 荧光字、`Neon` 灯管闪亮入场、`bubble()` 头顶毛玻璃气泡、`vs_card()` 大楼「新房 VS 拍卖」图形卡（大楼照片放 `frames/building.jpg`，没有就用占位图）。`demo_looks.py` 出选择表和示范片
 - 剪掉开头 1 秒；音乐 2.14s「得标」才进来
 - 转写更正：Arte Plus、Jalan Ampang；「内容才标280千」原话不确定，字幕写「才标280千」
