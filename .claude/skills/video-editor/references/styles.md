@@ -1,4 +1,4 @@
-# 风格模板 A–F
+# 风格模板 A–G
 
 每个风格都写：适合 / 配色 / 字体 / 字幕动画 / 特效 / 转场 / 音效与音乐 / 结构。
 
@@ -122,3 +122,31 @@
   - 7.5–8.8s：故障 tick + 颤音 bleep 回来，对上 logo 收尾
   - **规律**：每个画面动作都有对应音效；"紧-松-紧"三段起伏；整体偏数字/故障/8-bit 音色
 - **结构**：钩子"Congrats! You built a product." → 转折"But…"（竞争对手 vs 你的）→ 问题"does anyone understand its value/difference/advantage/uniqueness?" → 宣言"let's show the world why it matters." → logo
+
+## G. 暖色套框展示风（Warm Studio Showcase / 放大放小）
+**来源**：Df-5A1_x_MS（Edita Visuals，约 9.5 秒，**已听声音**）
+- **适合**：工作室/公司介绍、招聘、"AI 帮我剪的"作品展示、个人品牌自我介绍
+- **核心技巧：放大放小（scale in / scale out）**
+  - 0–1.8s 全屏正常播放（人物坐在单人沙发，大全景）
+  - **约 1.8–2.1s 整个画面缩小成一张圆角卡片（约 0.3 秒，先快后慢 ease-out）**，露出浅灰底的"展示台"：左后方一张黑白小卡"Raw footage"（原片），顶部徽章"Opus 5.5"，底部固定文案 "Follow & comment "CLAUDE" for the full guide"
+  - 卡片里的内容继续播放，里面再做推近（机器人画面慢慢放大）→ **外框不动、里面在动**，层次感强
+  - 切场景时用一张深色卡（发光蓝色 3D 像素人偶）闪一下，跟片头呼应
+  - 结尾新图片以小卡片"弹出 + 放大"叠在主画面上
+- **配色**：暖米色墙 + 陶土橘/赤陶色 #B4552F 左右（大字、像素方块）+ 白 + 浅灰展示台；Claude 橘色点缀
+- **字体**：超粗斜体无衬线大字（Archivo Black Italic / Inter Black Italic 类），字很大、放在人物上方的墙面；搭配细斜体小字引导（"My name is"、"The AI"、"Who can edit with"）
+- **文字特效**：
+  - 大字逐字母打出（E → Ed → Edi → Edita），字母之间有错位/重影
+  - 陶土色**像素小方块**散落在字周围，像数字碎片
+  - 一条白色波浪线从上往下画出（line draw 转场）
+  - 墙上弹出照片卡（白框、有阴影），像挂在墙上的画
+  - 招聘句："Right now we're hiring **CREATIVE** **AMBITIOUS EDITORS**"，关键词超粗大写，配纸飞机、播放键小图标
+- **画面素材**：真人口播大全景 + AI 生成画面（云中 3D 机器人）+ AI 人像照片卡
+- **声音（实测）**：**没有旁白**（转写不到语音），音乐 + 音效驱动，整片 -14.1 LUFS
+  - 0–1.4s：**很重的低频轰鸣（sub boom）**，对上片头深色 3D 人偶 → 一开场就"震"一下
+  - 开头和 5.3s、7.4s：高频**下滑闪烁音**（频谱上一串往下的斜线，sparkle swish），对上画面切换
+  - 全程：短促的**拨弦/plucky 旋律**（600–1100Hz 短音，带滑音），轻快
+  - 1.5–1.9s：密集 click，对上像素方块和字母出现
+  - 约 2.2–2.4s：上扬 whoosh，对上**画面缩小成卡片**
+  - 约 3.9–4.7s：**高频突然被切掉（低通滤波）**，对上进入云朵机器人场景 → 声音"闷"一下制造空间感，再打开
+  - 结尾：click + 闪烁音配合卡片弹出
+- **结构**：自我介绍"My name is Edita"→ 身份"OWNER"→ 缩小成展示卡 →"The AI Editing Studio"→ 招聘"Right now we're hiring creative ambitious editors"→"Who can edit with Claude"→ 底部 CTA 全程挂着
