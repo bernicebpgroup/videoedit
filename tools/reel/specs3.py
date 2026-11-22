@@ -80,7 +80,7 @@ def title_el(t0, t1, text, size, y, out=0.15):
 # ---------- elements ----------
 def v3_elements(book1, book2):
     E = []
-    C1 = cached("c1", lambda: card(book1, "第一本", 280, 330)); C2 = cached("c2", lambda: card(book2, "第二本", 280, 330))
+    C1 = cached("c1", lambda: card(book1, "拍卖真相", 280, 330)); C2 = cached("c2", lambda: card(book2, "法拍传奇", 280, 330))
     CA = cached("ca", lambda: card(book1, "拍卖经验", 300, 360)); CB = cached("cb", lambda: card(book2, "成功步骤", 300, 360))
     CC = cached("cc", lambda: card(book1, "留言 BOOK", 300, 360))
     # 0–2.85 两本书

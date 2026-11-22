@@ -8,7 +8,7 @@ G = "eq=contrast=1.06:saturation=1.05,colorbalance=bs=0.04:bh=-0.02,vignette=PI/
 raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", "0.5", "-i", "src/src.mp4", "-map", "0:v:0", "-frames:v", "1", "-vf", f"scale={W}:{H},{G}",
                       "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True).stdout
 base = Image.frombuffer("RGB", (W, H), raw).convert("RGBA")
-b1 = base.crop((110, 1470, 560, 1880)).rotate(180); b2 = base.crop((470, 1500, 900, 1900)).rotate(180)
+b1 = Image.open("covers/book1.png").convert("RGBA"); b2 = Image.open("covers/book2.png").convert("RGBA")
 els = specs3.v3_elements(b1, b2)
 if mode == "preview":
     times = [float(x) for x in sys.argv[4].split(",")]
