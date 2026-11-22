@@ -1,5 +1,5 @@
 """Reel render engine: base video (zoom/grade) + animated overlays + synthesized music/SFX."""
-import subprocess, math, re, numpy as np
+import subprocess, math, re, os, numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import scipy.signal as ss
 
@@ -268,8 +268,25 @@ def mix(voice, dur, sfx_events, out_wav, bpm=81, music_start=0.0, music_gain_db=
         e = min(n, s + len(x)); fx[s:e] += x[:e - s]
     y = v + m + fx
     pcm = (np.clip(y, -1, 1) * 32767).astype(np.int16)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "1", "-i", "-",
-                    "-af", "loudnorm=I=-14:TP=-1.5:LRA=11", "-ar", str(SR), "-ac", "2", out_wav], input=pcm.tobytes(), check=True)
+    loudnorm_2pass(pcm, out_wav)
+
+def loudnorm_2pass(pcm, out_wav, I=-14, TP=-1.5, LRA=11):
+    """two-pass loudnorm (measure, then linear gain) -> lands on I LUFS; one-pass dynamic mode undershoots."""
+    import json
+    base = ["ffmpeg", "-hide_banner", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "1", "-i", "-"]
+    r = subprocess.run(base + ["-af", f"loudnorm=I={I}:TP={TP}:LRA={LRA}:print_format=json", "-f", "null", "-"],
+                       input=pcm.tobytes(), capture_output=True, text=False)
+    js = r.stderr.decode(); js = json.loads(js[js.rindex("{"):js.rindex("}") + 1])
+    af = (f"loudnorm=I={I}:TP={TP}:LRA={LRA}:linear=true:measured_I={js['input_i']}:measured_TP={js['input_tp']}"
+          f":measured_LRA={js['input_lra']}:measured_thresh={js['input_thresh']}:offset={js['target_offset']}")
+    tmp = out_wav + ".tmp.wav"
+    subprocess.run(base[:1] + ["-v", "error"] + base[2:] + ["-af", af, "-ar", str(SR), "-ac", "2", tmp], input=pcm.tobytes(), check=True)
+    # final trim: measure the real result (ebur128) and apply the exact remaining gain
+    e = subprocess.run(["ffmpeg", "-nostats", "-i", tmp, "-af", "ebur128", "-f", "null", "-"], capture_output=True, text=True).stderr
+    got = float(re.findall(r"I:\s+(-?[\d.]+) LUFS", e)[-1])
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", tmp, "-af", f"volume={I - got:.2f}dB,alimiter=limit={10 ** (TP / 20):.3f}:level=false",
+                    out_wav], check=True)
+    os.remove(tmp)
 
 def mux(video, audio, out):
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", video, "-i", audio, "-map", "0:v", "-map", "1:a", "-c:v", "copy",
