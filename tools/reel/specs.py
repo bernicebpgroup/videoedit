@@ -54,8 +54,8 @@ def v2_elements():
     E = []; SY = 1450
     # hook
     # text-behind-person: huge 得标 sits between the wall and the speaker
-    E.append(El(1.0, 3.5, rich_text("刚刚", 84), W / 2 - 300, 320, "pop", 0.2))
-    E.append(El(1.0, 3.5, rich_text("[得标]！", 330, hl_scale=1.0), W / 2 + 20, 500, "slam", 0.2, behind=True))
+    E.append(El(1.0, 3.5, rich_text("刚刚", 72), W / 2 - 330, 300, "pop", 0.2))
+    E.append(El(1.0, 3.5, rich_text("[得标]！", 300, hl_scale=1.0), W / 2 + 30, 445, "slam", 0.2, behind=True))
     E.append(El(2.60, 3.5, pill("新鲜出炉", 50), W / 2, 750, "pop"))
     # location tag (UI chip)
     E.append(El(3.62, 9.0, pill("KL · Arte Plus", 50, fg=WHITE, bg=(14, 26, 43, 225)), W / 2, 330, "slide"))
