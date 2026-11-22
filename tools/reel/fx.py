@@ -183,3 +183,115 @@ def vs_card(t0, t1, photo="frames/building.jpg", z=6):
     fv = ffont("sans_black", 90); b = fv.getbbox("VS"); dv.text((115 - (b[2] - b[0]) / 2 - b[0], 115 - (b[3] - b[1]) / 2 - b[1]), "VS", font=fv, fill=(20, 26, 40))
     NOTE = text2("（占位图：请提供 Arte Plus 大楼照片）", 30, "sans_medium", shadow="soft")
     return Fn(t0, t1, draw, z=z)
+
+# ---------------- Instagram safe zone ----------------
+SAFE_TOP, SAFE_BOTTOM, SAFE_RIGHT, SAFE_LEFT = 270, 1500, 950, 60   # keep text inside (IG header / caption+buttons / action rail)
+
+def safe_overlay(c):
+    """debug overlay: shade the IG UI zones."""
+    o = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(o)
+    for box in [(0, 0, W, SAFE_TOP), (0, SAFE_BOTTOM, W, H), (SAFE_RIGHT, SAFE_TOP, W, SAFE_BOTTOM)]:
+        d.rectangle(box, fill=(255, 40, 40, 70))
+    d.rectangle((SAFE_LEFT, SAFE_TOP, SAFE_RIGHT, SAFE_BOTTOM), outline=(80, 255, 120, 220), width=4)
+    c.alpha_composite(o)
+
+# ---------------- impact caption (震撼) ----------------
+def _tint(spr, col):
+    t = Image.new("RGBA", spr.size, col + (0,)); t.putalpha(spr.split()[3]); return t
+
+class Impact:
+    """slam caption: drops in from 3x with motion-trail ghosts, RGB split + shockwave ring + white flash on landing,
+    then a light sweep across the letters. Pair with an impact SFX + screen shake at t0 + LAND."""
+    LAND = 0.14
+    def __init__(self, t0, t1, spr, cx, cy, z=5, flash=True, ring=GOLD, out=0.15):
+        self.t0, self.t1, self.spr, self.cx, self.cy, self.z, self.flash, self.ring, self.out = t0, t1, spr, cx, cy, z, flash, ring, out
+        self.behind = False; self.r = _tint(spr, (255, 40, 80)); self.b = _tint(spr, (40, 220, 255))
+        m = spr.split()[3]; self.mask = m
+    def draw(self, c, t):
+        if not (self.t0 <= t < self.t1): return
+        a = t - self.t0; o = clamp((self.t1 - t) / self.out); L = self.LAND
+        if a < L:                                    # falling: 3x -> 1x with ghost trail
+            k = a / L; s = 3.0 - 2.0 * k ** 2
+            for g in range(4, 0, -1):
+                sg = 3.0 - 2.0 * max(0, k - g * 0.06) ** 2
+                place(c, self.spr, self.cx, self.cy, sg, 0.12 * clamp(k * 3) * o)
+            place(c, self.spr, self.cx, self.cy, s, clamp(k * 4) * o); return
+        b = a - L
+        if b < 0.5:                                  # shockwave ring
+            r = 80 + 900 * (1 - (1 - b / 0.5) ** 3); w = max(2, int(26 * (1 - b / 0.5)))
+            ring = Image.new("RGBA", (W, H), (0, 0, 0, 0)); ImageDraw.Draw(ring).ellipse((self.cx - r, self.cy - r * 0.55, self.cx + r, self.cy + r * 0.55), outline=self.ring + (int(200 * (1 - b / 0.5)),), width=w)
+            c.alpha_composite(ring.filter(ImageFilter.GaussianBlur(2)))
+        if self.flash and b < 0.12:                  # white flash
+            c.alpha_composite(Image.new("RGBA", (W, H), (255, 255, 255, int(150 * (1 - b / 0.12)))))
+        s = 1 + 0.12 * math.exp(-b * 9) * math.cos(b * 30)     # settle wobble
+        sp = max(0.0, 1 - b / 0.35); off = int(18 * sp)          # RGB split decays
+        if off: place(c, self.r, self.cx - off, self.cy, s, 0.7 * o); place(c, self.b, self.cx + off, self.cy, s, 0.7 * o)
+        place(c, self.spr, self.cx, self.cy, s, o)
+        if 0.15 < b < 0.75:                          # light sweep
+            q = (b - 0.15) / 0.6; sw = Image.new("L", self.spr.size, 0); x = int(-200 + (self.spr.width + 400) * q)
+            ImageDraw.Draw(sw).polygon([(x, 0), (x + 90, 0), (x - 30, self.spr.height), (x - 120, self.spr.height)], fill=210)
+            sw = Image.composite(sw.filter(ImageFilter.GaussianBlur(14)), Image.new("L", sw.size, 0), self.mask)
+            hi = Image.new("RGBA", self.spr.size, (255, 255, 255, 0)); hi.putalpha(sw)
+            place(c, hi, self.cx, self.cy, s, o)
+
+# ---------------- price drop (跳楼价) ----------------
+def price_drop(t0, t_mid, t_crash, t1, start=600, mid=500, end=280, cy=1060, label="Arte Plus 价格", unit=1000):
+    """glass board: price line chart that holds at `start`, steps to `mid`, then plunges off a cliff to `end`;
+    big counter rolls down with it; 'jumped-off-a-building' crash = shake/RGB split; savings stamp lands after."""
+    PW, PH = 840, 720; x0, y0 = W / 2 - PW / 2, cy - PH / 2
+    fN = ffont("sans_black", 120); fL = ffont("sans_medium", 44); fS = ffont("sans_black", 46)
+    def val(t):
+        if t < t_mid: return start
+        if t < t_mid + 0.5: return start + (mid - start) * spring(t - t_mid, 0.9, 2.0)
+        if t < t_crash: return mid
+        k = clamp((t - t_crash) / 0.55); return mid + (end - mid) * (1 - (1 - k) ** 3)
+    stamp = text2(f"[便宜 RM{(start - end) * unit:,}]", 80, "sans_black", hl=(255, 214, 80), neon=True, shadow="deep")
+    gx0, gx1, gy_top, gy_bot = x0 + 70, x0 + PW - 70, y0 + 300, y0 + PH - 60
+    ymap = lambda v: gy_top + (start - v) / (start - end) * (gy_bot - gy_top)
+    def draw(c, tl, t):
+        o = clamp(tl / 0.1) * clamp((t1 - t) / 0.2)
+        if o <= 0: return
+        # glass board
+        p = spring(tl, 0.5, 3.0); bx = (int(x0), int(y0 + 40 * (1 - p)), int(x0 + PW), int(y0 + PH + 40 * (1 - p)))
+        reg = c.crop(bx).filter(ImageFilter.GaussianBlur(22)); reg.alpha_composite(Image.new("RGBA", reg.size, (12, 20, 36, 150)))
+        m = Image.new("L", reg.size, 0); ImageDraw.Draw(m).rounded_rectangle((0, 0, reg.width - 1, reg.height - 1), 36, fill=int(255 * o)); c.paste(reg, bx[:2], m)
+        ov = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(ov); dy = bx[1] - y0
+        d.rounded_rectangle(bx, 36, outline=(255, 255, 255, int(110 * o)), width=2)
+        d.text((x0 + 60, y0 + 40 + dy), label, font=fL, fill=(200, 210, 225, int(255 * o)))
+        v = val(t); crashing = t >= t_crash and t < t_crash + 0.55; landed = t >= t_crash + 0.55
+        col = (255, 70, 80) if crashing else ((120, 195, 255) if landed else WHITE)
+        num = f"RM{int(round(v)) * unit:,}"
+        # chart: polyline up to now
+        pts = []; T0 = t0 + 0.2
+        def tx(tt):   # x position: hold+step take 55% of width, the crash the last 45% (steep cliff)
+            if tt < t_crash: return gx0 + (gx1 - gx0) * 0.55 * (tt - T0) / (t_crash - T0)
+            return gx0 + (gx1 - gx0) * (0.55 + 0.45 * clamp((tt - t_crash) / 0.55) ** 2.5)
+        for i in range(0, 141):
+            tt = T0 + (t_crash + 0.55 - T0) * i / 140
+            if tt > t: break
+            pts.append((tx(tt), ymap(val(tt)) + dy))
+        if len(pts) > 1:
+            gl = Image.new("RGBA", (W, H), (0, 0, 0, 0)); ImageDraw.Draw(gl).line(pts, fill=col + (255,), width=14, joint="curve")
+            ov.alpha_composite(gl.filter(ImageFilter.GaussianBlur(10))); d.line(pts, fill=col + (int(255 * o),), width=7, joint="curve")
+            ex, ey = pts[-1]; d.ellipse((ex - 12, ey - 12, ex + 12, ey + 12), fill=WHITE + (int(255 * o),))
+            if crashing:    # falling arrow head
+                d.polygon([(ex - 26, ey - 10), (ex + 26, ey - 10), (ex, ey + 34)], fill=col + (int(255 * o),))
+        # dashed reference at start price
+        for xx in range(int(gx0), int(gx1), 28): d.line([(xx, ymap(start) + dy), (xx + 14, ymap(start) + dy)], fill=(255, 255, 255, int(70 * o)), width=2)
+        c.alpha_composite(ov)
+        # big counter (shakes + RGB split while crashing)
+        sx = int(14 * math.sin(t * 90)) if crashing else 0
+        spr = text2(num, 120, "sans_black", color=col, shadow="deep")
+        if crashing:
+            place(c, _tint(spr, (255, 40, 80)), W / 2 - 14 + sx, y0 + 175 + dy, 1, 0.6 * o); place(c, _tint(spr, (40, 220, 255)), W / 2 + 14 + sx, y0 + 175 + dy, 1, 0.6 * o)
+        if landed:
+            q = t - (t_crash + 0.55); s2 = 1 + 0.18 * math.exp(-q * 8) * math.cos(q * 28)
+            place(c, text2(f"[{num}]", 120, "sans_black", hl=(120, 195, 255), neon=True), W / 2, y0 + 175 + dy, s2, o)
+        else:
+            place(c, spr, W / 2 + sx, y0 + 175 + dy, 1, o)
+        # savings stamp
+        ts = t_crash + 0.75
+        if t >= ts:
+            q = t - ts; s3 = 2.6 - 1.6 * spring(q, 0.4, 3.4)
+            place(c, stamp, W / 2 + 40, y0 - 30 + dy, s3, clamp(q / 0.05) * o, -6)
+    return Fn(t0, t1, draw, z=6)
