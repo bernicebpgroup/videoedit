@@ -16,9 +16,8 @@ def frame_at(spec, els, t):
     if s > 1.001:
         cw, ch = W / s, H / s; x0 = clamp(cx - cw / 2, 0, W - cw); y0 = clamp(cy - ch / 2, 0, H - ch)
         im = im.resize((W, H), Image.BILINEAR, box=(x0, y0, x0 + cw, y0 + ch))
-    c = im.convert("RGBA")
-    for el in sorted(els, key=lambda x: x.z): el.draw(c, t)
-    return c.convert("RGB")
+    return composite(im, t, sorted(els, key=lambda x: x.z), SEG).convert("RGB")
+SEG = Seg()
 
 out, which = sys.argv[2], sys.argv[3]
 times = [float(x) for x in sys.argv[4].split(",")]

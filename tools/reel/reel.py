@@ -19,6 +19,11 @@ def ease_out(x): x = clamp(x); return 1 - (1 - x) ** 3
 def ease_io(x): x = clamp(x); return x * x * (3 - 2 * x)
 def back_out(x, s=1.7):
     x = clamp(x); x -= 1; return x * x * ((s + 1) * x + s) + 1
+def spring(tsec, zeta=0.45, freq=3.5):
+    """damped spring 0 -> 1 (overshoots ~20%, settles in ~0.4s). tsec = seconds since start."""
+    if tsec <= 0: return 0.0
+    w = 2 * math.pi * freq; wd = w * math.sqrt(1 - zeta * zeta)
+    return 1 - math.exp(-zeta * w * tsec) * (math.cos(wd * tsec) + zeta * w / wd * math.sin(wd * tsec))
 
 # ---------- sprite builders ----------
 def rich_text(text, size, color=WHITE, hl=GOLD, serif=False, stroke=6, shadow=True, hl_scale=1.0):
@@ -63,19 +68,21 @@ def place(canvas, spr, cx, cy, scale=1.0, alpha=1.0, angle=0):
 
 # ---------- element: generic timed sprite with pop-in / fade-out ----------
 class El:
-    def __init__(self, t0, t1, spr, cx, cy, anim="pop", out=0.15, angle=0, z=0):
+    def __init__(self, t0, t1, spr, cx, cy, anim="pop", out=0.15, angle=0, z=0, behind=False):
         self.t0, self.t1, self.spr, self.cx, self.cy, self.anim, self.out, self.angle, self.z = t0, t1, spr, cx, cy, anim, out, angle, z
+        self.behind = behind   # True = drawn between background and the (segmented) person
     def draw(self, c, t):
         if not (self.t0 <= t < self.t1): return
         a = (t - self.t0); o = clamp((self.t1 - t) / self.out) if self.out else 1
-        if self.anim == "pop":
-            s = 0.6 + 0.4 * back_out(a / 0.22); al = clamp(a / 0.1) * o; place(c, self.spr, self.cx, self.cy, s, al, self.angle)
-        elif self.anim == "slam":   # big -> normal (impact)
-            s = 1.0 + 0.9 * (1 - ease_out(a / 0.18)); al = clamp(a / 0.06) * o; place(c, self.spr, self.cx, self.cy, s, al, self.angle)
-        elif self.anim == "up":     # fade + rise
-            dy = 40 * (1 - ease_out(a / 0.25)); place(c, self.spr, self.cx, self.cy + dy, 1, clamp(a / 0.18) * o, self.angle)
-        elif self.anim == "slide":  # from right
-            dx = 300 * (1 - ease_out(a / 0.3)); place(c, self.spr, self.cx + dx, self.cy, 1, clamp(a / 0.15) * o, self.angle)
+        if self.anim == "pop":      # spring jump: small + below -> overshoot -> settle
+            p = spring(a); s = 0.55 + 0.45 * p; dy = 50 * (1 - p); al = clamp(a / 0.08) * o
+            place(c, self.spr, self.cx, self.cy + dy, s, al, self.angle)
+        elif self.anim == "slam":   # huge -> undershoot -> settle (spring)
+            s = 2.4 - 1.4 * spring(a, 0.4, 3.2); al = clamp(a / 0.05) * o; place(c, self.spr, self.cx, self.cy, s, al, self.angle)
+        elif self.anim == "up":     # spring rise
+            dy = 70 * (1 - spring(a, 0.5, 3.0)); place(c, self.spr, self.cx, self.cy + dy, 1, clamp(a / 0.15) * o, self.angle)
+        elif self.anim == "slide":  # from right, spring
+            dx = 320 * (1 - spring(a, 0.55, 2.8)); place(c, self.spr, self.cx + dx, self.cy, 1, clamp(a / 0.12) * o, self.angle)
         else: place(c, self.spr, self.cx, self.cy, 1, o, self.angle)
 
 class Fn:
@@ -99,6 +106,40 @@ def typewriter(t0, t1, text, cx, cy, size, t_type, box=True, cursor=True):
             sc = 0.8 + 0.2 * back_out(tl / 0.2); place(c, bx, cx, cy, sc, clamp(tl / 0.08))
     return Fn(t0, t1, draw)
 
+# ---------- person segmentation (for text-behind-person) ----------
+import os
+SEG_MODEL = os.environ.get("SEG_MODEL", "models/selfie_multiclass_256x256.tflite")
+class Seg:
+    """per-frame person mask (MediaPipe selfie multiclass), feathered + temporally smoothed."""
+    def __init__(self):
+        self.m = None; self.prev = None; self.prev_i = -9
+    def mask(self, rgb, i=None):
+        if self.m is None:
+            import mediapipe as mp
+            from mediapipe.tasks.python import vision, BaseOptions
+            self.mp = mp
+            self.m = vision.ImageSegmenter.create_from_options(vision.ImageSegmenterOptions(
+                base_options=BaseOptions(model_asset_path=SEG_MODEL), output_confidence_masks=True))
+        a = np.ascontiguousarray(np.asarray(rgb.convert("RGB")))
+        r = self.m.segment(self.mp.Image(image_format=self.mp.ImageFormat.SRGB, data=a))
+        p = 1 - np.squeeze(r.confidence_masks[0].numpy_view())
+        if self.prev is not None and i is not None and i == self.prev_i + 1: p = 0.6 * p + 0.4 * self.prev
+        self.prev, self.prev_i = p, (i if i is not None else -9)
+        m = Image.fromarray((np.clip((p - 0.5) * 4 + 0.5, 0, 1) * 255).astype(np.uint8)).resize(rgb.size, Image.BILINEAR)
+        return m.filter(ImageFilter.GaussianBlur(3))
+
+def composite(im, t, elements, seg=None, i=None):
+    """im: graded+zoomed RGB frame. Elements with .behind=True go under the person."""
+    c = im.convert("RGBA")
+    beh = [e for e in elements if getattr(e, "behind", False) and e.t0 <= t < e.t1]
+    if beh and seg is not None:
+        pm = seg.mask(im, i)
+        for el in beh: el.draw(c, t)
+        c.paste(im.convert("RGBA"), (0, 0), pm)
+    for el in elements:
+        if not (getattr(el, "behind", False) and seg is not None): el.draw(c, t)
+    return c
+
 # ---------- render ----------
 def render(src, out_noaudio, t_start, dur, zoom_keys, elements, grade, shakes=()):
     """zoom_keys: list of (t, scale, cx, cy, ease_time). shakes: list of (t, strength)."""
@@ -108,6 +149,7 @@ def render(src, out_noaudio, t_start, dur, zoom_keys, elements, grade, shakes=()
     enc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                             "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p", out_noaudio], stdin=subprocess.PIPE)
     fs = W * H * 3; i = 0
+    seg = Seg() if any(getattr(e, "behind", False) for e in elements) else None
     while True:
         buf = dec.stdout.read(fs)
         if len(buf) < fs: break
@@ -129,8 +171,7 @@ def render(src, out_noaudio, t_start, dur, zoom_keys, elements, grade, shakes=()
             cw, ch = W / s, H / s
             x0 = clamp(cx - cw / 2 + sx, 0, W - cw); y0 = clamp(cy - ch / 2 + sy, 0, H - ch)
             im = im.resize((W, H), Image.BILINEAR, box=(x0, y0, x0 + cw, y0 + ch))
-        c = im.convert("RGBA")
-        for el in elements: el.draw(c, t)
+        c = composite(im, t, elements, seg, i)
         enc.stdin.write(c.convert("RGB").tobytes()); i += 1
     enc.stdin.close(); enc.wait(); dec.wait(); return i
 

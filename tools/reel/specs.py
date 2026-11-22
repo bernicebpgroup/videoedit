@@ -53,8 +53,10 @@ OFF2 = 1.0   # trim first second (silence)
 def v2_elements():
     E = []; SY = 1450
     # hook
-    E.append(El(1.0, 3.5, rich_text("刚刚[得标]！", 120), W / 2, 380, "slam", 0.2))
-    E.append(El(2.60, 3.5, pill("新鲜出炉", 50), W / 2, 530, "pop"))
+    # text-behind-person: huge 得标 sits between the wall and the speaker
+    E.append(El(1.0, 3.5, rich_text("刚刚", 84), W / 2 - 300, 320, "pop", 0.2))
+    E.append(El(1.0, 3.5, rich_text("[得标]！", 330, hl_scale=1.0), W / 2 + 20, 500, "slam", 0.2, behind=True))
+    E.append(El(2.60, 3.5, pill("新鲜出炉", 50), W / 2, 750, "pop"))
     # location tag (UI chip)
     E.append(El(3.62, 9.0, pill("KL · Arte Plus", 50, fg=WHITE, bg=(14, 26, 43, 225)), W / 2, 330, "slide"))
     E.append(El(7.28, 9.0, pill("Jalan Ampang", 46), W / 2, 450, "pop"))
@@ -131,7 +133,7 @@ def v2_elements():
     E.append(Fn(35.9, 44.6, split))
     # BMV 50%
     E.append(El(46.56, 48.2, rich_text("Below Market Value", 64), W / 2, 330, "up"))
-    E.append(El(47.22, 48.2, rich_text("[50%]", 190, serif=True), W / 2, 500, "slam", 0.1))
+    E.append(El(47.22, 48.2, rich_text("[50%]", 400, serif=True), W / 2, 680, "slam", 0.1, behind=True))
     # CTA
     E.append(El(48.24, 51.8, panel(860, 400), W / 2, 1180, "pop", 0))
     E.append(El(48.24, 51.8, rich_text("下方留言", 72), W / 2, 1070, "up", 0))
