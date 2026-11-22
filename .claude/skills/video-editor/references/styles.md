@@ -1,4 +1,4 @@
-# 风格模板 A–G
+# 风格模板 A–H
 
 每个风格都写：适合 / 配色 / 字体 / 字幕动画 / 特效 / 转场 / 音效与音乐 / 结构。
 
@@ -150,3 +150,43 @@
   - 约 3.9–4.7s：**高频突然被切掉（低通滤波）**，对上进入云朵机器人场景 → 声音"闷"一下制造空间感，再打开
   - 结尾：click + 闪烁音配合卡片弹出
 - **结构**：自我介绍"My name is Edita"→ 身份"OWNER"→ 缩小成展示卡 →"The AI Editing Studio"→ 招聘"Right now we're hiring creative ambitious editors"→"Who can edit with Claude"→ 底部 CTA 全程挂着
+
+## H. 高密度特效口播（1 秒 1 个效果 / 字在人后面）
+**来源**：DdHguJfhYSU（GP Multimedia，房产视频服务商，26.7 秒，已听声音）
+- **适合**：房产经纪、个人品牌、服务介绍；边走边讲的户外口播（人物从远处走向镜头）
+- **核心节奏**：**大约每 1 秒换一个视觉效果**，每个效果都"把那句话画出来"（字面意思视觉化）
+- **核心技巧：字在人后面（text behind person）**：人像抠图（segmentation），大字放在背景和人物之间，人走动时会挡住部分字母 → 立体感、高级感
+- **逐秒拆解（实测）**：
+  | 时间 | 台词 | 效果 |
+  |---|---|---|
+  | 0–0.8s | I can tell you my videos | 三色叠字：小白字 + 橘色 "tell you" + 蓝色大字 "MY VIDEOS" |
+  | 1.0s | work | 黑色粗体 "WORK"，**在人后面** |
+  | 1.25–1.75s | all day | **天空替换：白天 → 夕阳 → 黄昏 → 夜晚**（"all day" 字面化），大字 "ALL"、"DAY" 在人后面 |
+  | 2.0s | or | 银色金属质感 "OR" |
+  | 2.5s | I can show you | 橘色字 |
+  | 3.25–4.25s | in less than 10 seconds | 橘色圆形擦出 → 巨大橘色 "10" **在人后面** → "SECONDS" |
+  | 4.5s | — | **甩镜 + 运动模糊**切到新地点 |
+  | 4.75–6.75s | 450,000 views | 两张作品截图浮在头顶 + **数字从 0 跳到 450,000** + 红色爱心一颗颗飘出 |
+  | 6.75–7.25s | my business | 品牌 logo "GP Multimedia"（打字机衬线字）出现在头顶 |
+  | 7.5–9.0s | as a young entrepreneur | **画面变黑白**，橘+蓝双色字 "YOUNG ENTREPRENEUR" |
+  | 9.0–9.5s | that kind of reach | **颜色回来**，黑色大字 "REACH" 在人后面 |
+  | 9.75s | — | 白闪 |
+  | 10–12s | has completely changed… | 小号逐词字幕（一次一个词，放在胸口），给眼睛休息 |
+  | 12.0–13.3s | but that didn't happen by accident | 换地点；酒红色巨字 "DIDN'T" 在人后面 + "BY ACCIDENT" |
+  | 13.5s | — | 过曝白光 / 黄色漏光转场 |
+  | 14–15s | the hooks, the pacing, the edits | 头顶出现一圈**蓝色发光 3D 图标**（相机、手机、剪辑） |
+  | 15.25–16s | everything | 青色发光 3D 大字 "EVERYTHING" |
+  | 17.25–18.5s | and that attention | 橘色小字 + 蓝色大字 "ATTENTION" 在头顶 |
+  | 18.75–19.5s | real leads, real opportunities | 腰部位置弹出 UI 小标签 "Real Leads" |
+  | 20.75s | — | 运动模糊转场到第三个地点 |
+  | 21–23.5s | if you're ready… | 小号逐词字幕 |
+  | 23.75–25s | my number's right here | 肩膀旁边浮出**来电卡片**（头像 + 电话号码 + 绿色接听键） |
+  | 25.25–26.7s | DM me "VIDEO" | 黑色粗体 "DM ME" 滑入（在人后面）+ 白色粗体 "VIDEO" |
+- **规律**：
+  - 大效果（字在人后、天空替换、数字跳动）和小字幕（一次一个词）**交替**，不会一直很满
+  - 每 4–8 秒**换一个拍摄地点**，用甩镜/运动模糊/白闪接
+  - 颜色固定 3 个：橘、蓝、黑（加白）
+  - 字体：超粗无衬线（类似 Montserrat Black / Anton），全大写；品牌 logo 用打字机衬线
+- **拍摄要求**：人物边走边讲、从远走近、背景开阔（天空多）→ 方便字放在人后面、方便换天空
+- **声音（实测）**：人声 + 全程背景音乐（低频一直在），整片 -14.1 LUFS；约 6.5–7.2s 有高频闪烁音（数字停在 450,000、logo 出现时）；转场有 whoosh
+- **技术做法**：人像分割模型（rembg u2net_human_seg / MediaPipe selfie segmenter / RMBG）逐帧抠人 → 背景层 + 文字层 + 人物层叠合；天空替换 = 天空分割 + 换天空素材
