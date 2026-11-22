@@ -6,11 +6,12 @@ import scipy.signal as ss
 W, H, FPS, SR = 1080, 1920, 30, 48000
 FONT_SANS = "/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc"
 FONT_SERIF = "/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc"
+FONT_LIGHT = "/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc"
 GOLD = (88, 178, 255); BLUEBG = (28, 118, 240); WHITE = (255, 255, 255); NAVY = (14, 26, 43); GREY = (160, 168, 180)
 _fc = {}
-def font(size, serif=False):
-    k = (size, serif)
-    if k not in _fc: _fc[k] = ImageFont.truetype(FONT_SERIF if serif else FONT_SANS, size, index=2)
+def font(size, serif=False, light=False):
+    k = (size, serif, light)
+    if k not in _fc: _fc[k] = ImageFont.truetype(FONT_LIGHT if light else (FONT_SERIF if serif else FONT_SANS), size, index=2)
     return _fc[k]
 
 # ---------- easing / anim helpers ----------
@@ -26,10 +27,10 @@ def spring(tsec, zeta=0.45, freq=3.5):
     return 1 - math.exp(-zeta * w * tsec) * (math.cos(wd * tsec) + zeta * w / wd * math.sin(wd * tsec))
 
 # ---------- sprite builders ----------
-def rich_text(text, size, color=WHITE, hl=GOLD, serif=False, stroke=6, shadow=True, hl_scale=1.0):
+def rich_text(text, size, color=WHITE, hl=GOLD, serif=False, stroke=0, shadow=True, hl_scale=1.0, light=False):
     """'[...]' segments drawn in highlight colour (optionally bigger)."""
     parts = [(m, i % 2 == 1) for i, m in enumerate(re.split(r"\[|\]", text)) if m]
-    fonts = [font(int(size * (hl_scale if h else 1)), serif) for _, h in parts]
+    fonts = [font(int(size * (hl_scale if h else 1)), serif, light and not h) for _, h in parts]
     widths = [f.getbbox(p)[2] - f.getbbox(p)[0] for (p, _), f in zip(parts, fonts)]
     asc = max(f.getmetrics()[0] for f in fonts); desc = max(f.getmetrics()[1] for f in fonts)
     pad = stroke + 14
@@ -41,9 +42,11 @@ def rich_text(text, size, color=WHITE, hl=GOLD, serif=False, stroke=6, shadow=Tr
                stroke_width=stroke, stroke_fill=(10, 14, 24, 235))
         x += w
     if shadow:
-        sh = Image.new("RGBA", img.size, (0, 0, 0, 0)); a = img.split()[3].filter(ImageFilter.GaussianBlur(10))
-        sh.putalpha(a.point(lambda v: int(v * 0.55))); base = Image.new("RGBA", img.size, (0, 0, 0, 0))
-        base.alpha_composite(sh, (0, 6)); base.alpha_composite(img); img = base
+        # soft glow (no hard edge): wide blur, low opacity
+        pad2 = 30; big = Image.new("RGBA", (img.width + 2 * pad2, img.height + 2 * pad2), (0, 0, 0, 0))
+        a = Image.new("L", big.size, 0); a.paste(img.split()[3], (pad2, pad2)); a = a.filter(ImageFilter.GaussianBlur(16))
+        sh = Image.new("RGBA", big.size, (8, 12, 22, 0)); sh.putalpha(a.point(lambda v: int(v * 0.45)))
+        big.alpha_composite(sh, (0, 4)); big.alpha_composite(img, (pad2, pad2)); img = big
     return img
 
 def panel(w, h, fill=(14, 26, 43, 215), radius=36, border=GOLD, bw=3):
@@ -68,12 +71,13 @@ def place(canvas, spr, cx, cy, scale=1.0, alpha=1.0, angle=0):
 
 # ---------- element: generic timed sprite with pop-in / fade-out ----------
 class El:
-    def __init__(self, t0, t1, spr, cx, cy, anim="pop", out=0.15, angle=0, z=0, behind=False):
+    def __init__(self, t0, t1, spr, cx, cy, anim="pop", out=0.15, angle=0, z=0, behind=False, alpha=1.0):
         self.t0, self.t1, self.spr, self.cx, self.cy, self.anim, self.out, self.angle, self.z = t0, t1, spr, cx, cy, anim, out, angle, z
         self.behind = behind   # True = drawn between background and the (segmented) person
+        self.alpha = alpha
     def draw(self, c, t):
         if not (self.t0 <= t < self.t1): return
-        a = (t - self.t0); o = clamp((self.t1 - t) / self.out) if self.out else 1
+        a = (t - self.t0); o = (clamp((self.t1 - t) / self.out) if self.out else 1) * self.alpha
         if self.anim == "pop":      # spring jump: small + below -> overshoot -> settle
             p = spring(a); s = 0.55 + 0.45 * p; dy = 50 * (1 - p); al = clamp(a / 0.08) * o
             place(c, self.spr, self.cx, self.cy + dy, s, al, self.angle)
@@ -105,6 +109,74 @@ def typewriter(t0, t1, text, cx, cy, size, t_type, box=True, cursor=True):
             ImageDraw.Draw(bx).text((45 - b[0], 20), s, font=f, fill=WHITE)
             sc = 0.8 + 0.2 * back_out(tl / 0.2); place(c, bx, cx, cy, sc, clamp(tl / 0.08))
     return Fn(t0, t1, draw)
+
+# ---------- premium caption + graphics (style: soft text, glass, icons) ----------
+def stack(t0, t1, lines, cy, gap=10, stagger=0.09, out=0.15):
+    """centered stacked caption. lines: list of (text, size, dict(color=, light=, alpha=, hl_scale=))."""
+    E = []; sprs = []
+    for txt, size, kw in lines:
+        kw = dict(kw); al = kw.pop("alpha", 1.0)
+        sprs.append((rich_text(txt, size, **kw), al))
+    hs = [sp.height - 60 for sp, _ in sprs]; tot = sum(hs) + gap * (len(hs) - 1); y = cy - tot / 2
+    for k, ((sp, al), h) in enumerate(zip(sprs, hs)):
+        E.append(El(t0 + k * stagger, t1, sp, W / 2, y + h / 2, "pop", out, alpha=al)); y += h + gap
+    return E
+
+def words(t0, t1, text, cy, size=66, alpha=0.92, color=WHITE):
+    """thin semi-transparent caption shown chunk by chunk ('/' separates chunks)."""
+    ch = [c for c in text.split("/") if c]; n = len(ch); d = (t1 - t0) / n
+    return [El(t0 + k * d, t0 + (k + 1) * d if k < n - 1 else t1, rich_text(c, size, color=color, light=True), W / 2, cy, "pop", 0.06, alpha=alpha)
+            for k, c in enumerate(ch)]
+
+def icon(kind, size=96, color=WHITE):
+    S = size * 4; im = Image.new("RGBA", (S, S), (0, 0, 0, 0)); d = ImageDraw.Draw(im); c = color + (255,); w = S // 14
+    if kind == "pin":
+        d.ellipse((S * .2, S * .06, S * .8, S * .66), fill=c); d.polygon([(S * .25, S * .48), (S * .75, S * .48), (S * .5, S * .95)], fill=c)
+        d.ellipse((S * .38, S * .24, S * .62, S * .48), fill=(0, 0, 0, 0))
+    elif kind == "house":
+        d.polygon([(S * .5, S * .08), (S * .94, S * .48), (S * .06, S * .48)], fill=c); d.rectangle((S * .18, S * .46, S * .82, S * .9), fill=c)
+        d.rectangle((S * .42, S * .62, S * .58, S * .9), fill=(0, 0, 0, 0))
+    elif kind == "down":
+        d.rectangle((S * .42, S * .08, S * .58, S * .6), fill=c); d.polygon([(S * .16, S * .52), (S * .84, S * .52), (S * .5, S * .92)], fill=c)
+    elif kind == "check":
+        d.line([(S * .14, S * .52), (S * .4, S * .78), (S * .88, S * .22)], fill=c, width=w * 2, joint="curve")
+    elif kind == "gavel":
+        g = Image.new("RGBA", (S, S), (0, 0, 0, 0)); gd = ImageDraw.Draw(g)
+        gd.rounded_rectangle((S * .2, S * .18, S * .8, S * .42), S // 20, fill=c); gd.rectangle((S * .44, S * .4, S * .56, S * .9), fill=c)
+        im = g.rotate(35, Image.BICUBIC); d = ImageDraw.Draw(im); d.rectangle((S * .1, S * .88, S * .7, S * .96), fill=c)
+    return im.resize((size, size), Image.LANCZOS)
+
+class Glass:
+    """frosted-glass card: blurs what is behind it, light tint, thin white border, optional content sprite."""
+    def __init__(self, t0, t1, w, h, cx, cy, content=None, out=0.15, z=0, radius=34, tint=(255, 255, 255, 38), anim="pop", border=110):
+        self.t0, self.t1, self.w, self.h, self.cx, self.cy, self.content, self.out, self.z = t0, t1, w, h, cx, cy, content, out, z
+        self.radius, self.tint, self.anim, self.border = radius, tint, anim, border; self.behind = False
+    def draw(self, c, t):
+        if not (self.t0 <= t < self.t1): return
+        a = t - self.t0; o = clamp((self.t1 - t) / self.out) if self.out else 1; o *= clamp(a / 0.08)
+        p = spring(a); s = 0.7 + 0.3 * p; dy = 40 * (1 - p)
+        w, h = max(4, int(self.w * s)), max(4, int(self.h * s)); x0, y0 = int(self.cx - w / 2), int(self.cy + dy - h / 2)
+        bx = (max(0, x0), max(0, y0), min(W, x0 + w), min(H, y0 + h))
+        if bx[2] - bx[0] < 4 or bx[3] - bx[1] < 4 or o <= 0.01: return
+        reg = c.crop(bx).filter(ImageFilter.GaussianBlur(22))
+        reg.alpha_composite(Image.new("RGBA", reg.size, self.tint))
+        reg.alpha_composite(Image.new("RGBA", reg.size, (14, 26, 43, 60)))
+        m = Image.new("L", (w, h), 0); ImageDraw.Draw(m).rounded_rectangle((0, 0, w - 1, h - 1), int(self.radius * s), fill=int(255 * o))
+        m = m.crop((bx[0] - x0, bx[1] - y0, bx[2] - x0, bx[3] - y0))
+        c.paste(reg, bx[:2], m)
+        bd = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        ImageDraw.Draw(bd).rounded_rectangle((1, 1, w - 2, h - 2), int(self.radius * s), outline=(255, 255, 255, int(self.border * o)), width=2)
+        c.alpha_composite(bd, (x0, y0)) if x0 >= 0 and y0 >= 0 and x0 + w <= W and y0 + h <= H else None
+        if self.content is not None: place(c, self.content, self.cx, self.cy + dy, s, o)
+
+def glass_label(t0, t1, text, cx, cy, size=48, ic=None, ic_color=GOLD, **kw):
+    """glass pill with optional icon + soft text."""
+    f = font(size); b = f.getbbox(text); tw = b[2] - b[0]; isz = int(size * 1.15) if ic else 0
+    w = tw + isz + (24 if ic else 0) + 80; h = int(size * 2.0)
+    spr = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(spr); x = 40
+    if ic: spr.alpha_composite(icon(ic, isz, ic_color), (x, (h - isz) // 2)); x += isz + 24
+    d.text((x - b[0], (h - (f.getmetrics()[0] + f.getmetrics()[1])) // 2), text, font=f, fill=WHITE)
+    return Glass(t0, t1, w, h, cx, cy, spr, radius=h // 2, **kw)
 
 # ---------- person segmentation (for text-behind-person) ----------
 import os

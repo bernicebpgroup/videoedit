@@ -10,6 +10,7 @@
 | https://www.instagram.com/reel/DfZivEts0Fz/ | Milad Aslani | 声音 + 风格 | F | 已听（转写 + 频谱） |
 | https://www.instagram.com/reel/Df-5A1_x_MS/ | Edita Visuals | 风格（放大放小） | G | 已听（转写 + 频谱） |
 | https://www.instagram.com/reel/DdHguJfhYSU/ | GP Multimedia | 字在人后 + 一秒一个特效 | H | 已听（转写 + 频谱） |
+| https://www.instagram.com/reel/DfIP1uKu9xO/ | BENI MEDIA | 高级感重点字幕 + 毛玻璃 graphic | I | 已听（转写） |
 | https://www.facebook.com/share/r/19vw37vrsP/ | — | 特效 | 未分析（网络无法访问 Facebook） | — |
 
 ## 分析方法（声音）

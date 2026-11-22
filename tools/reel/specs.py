@@ -51,25 +51,35 @@ V1_SFX = [(0.0, "impact", -8), (2.9, "whoosh", -6), (2.92, "pop", -6), (4.20, "p
 # ================= VIDEO 2 =================
 OFF2 = 1.0   # trim first second (silence)
 def v2_elements():
-    E = []; SY = 1450
-    # hook
-    # text-behind-person: huge 得标 sits between the wall and the speaker
-    E.append(El(1.0, 3.5, rich_text("刚刚", 72), W / 2 - 330, 300, "pop", 0.2))
+    """premium caption style: no outlines, one key phrase per sentence stacked in the centre,
+    thin semi-transparent chunk captions for filler, ghost words, frosted-glass cards + icons."""
+    E = []; CY = 1120; WY = 1180            # stacked-caption centre / thin-word line
+    B = dict(color=WHITE); A = dict(color=GOLD); L = dict(color=WHITE, light=True, alpha=0.95)
+    # hook: 得标 huge, behind the speaker
+    E.append(El(1.0, 3.5, rich_text("刚刚", 72, light=True), W / 2 - 330, 300, "pop", 0.2, alpha=0.9))
     E.append(El(1.0, 3.5, rich_text("[得标]！", 300, hl_scale=1.0), W / 2 + 30, 445, "slam", 0.2, behind=True))
-    E.append(El(2.60, 3.5, pill("新鲜出炉", 50), W / 2, 750, "pop"))
-    # location tag (UI chip)
-    E.append(El(3.62, 9.0, pill("KL · Arte Plus", 50, fg=WHITE, bg=(14, 26, 43, 225)), W / 2, 330, "slide"))
-    E.append(El(7.28, 9.0, pill("Jalan Ampang", 46), W / 2, 450, "pop"))
-    subs = [(3.62, 5.55, "这一个在[KL]"), (5.84, 7.20, "这一个[Arte Plus]"), (7.28, 8.95, "在[Jalan Ampang]"),
-            (9.00, 10.98, "人家买新的[六七百千]"), (11.06, 11.58, "你自己看"), (11.60, 12.80, "我们刚标到[多少钱]？"),
-            (15.86, 17.40, "比别人[便宜一倍]"), (17.96, 19.50, "买新的[600多千]"), (19.94, 20.95, "这是一个中国人"),
-            (20.95, 21.80, "的名字买到的"), (22.06, 23.30, "那么我们讲"), (23.40, 25.30, "现在市场[500多千]"),
-            (25.68, 27.50, "才标[280千]"), (34.92, 35.90, "有一句话"),
-            (40.66, 42.45, "你要成为像我们这样的[经营者]"), (43.08, 44.50, "还是[消费者]？"),
-            (45.10, 46.50, "如果你想要买到这样的property"), (49.68, 51.70, "我们教你也一样[买得到]")]
-    for t0, t1, s in subs: E.append(sub(t0, t1, s, SY, 64 if len(s) < 14 else 56))
-    # new price card
-    E.append(El(9.42, 12.9, pill("新房 RM600–700千", 54, fg=WHITE, bg=(14, 26, 43, 225)), W / 2, 330, "slide"))
+    E.append(glass_label(2.60, 3.5, "新鲜出炉", W / 2, 760, 46, ic="gavel"))
+    # location
+    E += stack(3.62, 5.55, [("这一个在", 68, L), ("KL", 150, A)], CY)
+    E.append(glass_label(3.62, 9.0, "Kuala Lumpur", W / 2, 330, 44, ic="pin"))
+    E += stack(5.84, 7.20, [("这一个", 68, L), ("Arte Plus", 130, B)], CY)
+    E += stack(7.28, 8.95, [("在", 68, L), ("Jalan Ampang", 112, B)], CY)
+    # new-launch price
+    E += stack(9.00, 10.98, [("人家买新的", 68, L), ("六七百千", 150, B)], CY)
+    E.append(glass_label(9.42, 12.9, "新房 RM600–700千", W / 2, 330, 46, ic="house", ic_color=WHITE))
+    E += words(11.06, 11.58, "你自己看", WY)
+    E += stack(11.60, 12.80, [("我们刚标到", 68, L), ("多少钱？", 140, A)], CY)
+    E.append(El(13.95, 15.75, rich_text("拍卖得标价", 50, light=True), W / 2, 420, "pop", 0.15, alpha=0.9))
+    E.append(El(14.12, 15.75, rich_text("RM[280千]", 140, hl_scale=1.15), W / 2, 1400, "slam", 0.15))
+    # comparison
+    E += stack(15.86, 17.40, [("比别人", 68, L), ("便宜一倍", 160, A)], CY)
+    E.append(Glass(15.98, 17.40, 120, 120, W / 2 + 400, CY - 90, icon("down", 70, GOLD), radius=36))
+    E += stack(17.96, 19.50, [("买新的", 68, L), ("600多千", 150, B)], CY)
+    E += words(19.94, 21.80, "这是一个/中国人的名字/买到的", WY)
+    E += words(22.06, 23.30, "那么我们讲", WY)
+    E += stack(23.40, 25.30, [("现在市场", 68, L), ("500多千", 150, B)], CY)
+    E += stack(25.68, 27.50, [("才标", 68, L), ("280千", 170, A)], CY)
+    E.append(El(25.68, 27.50, rich_text("280", 620, color=WHITE), W / 2, 640, "slam", 0.2, behind=True, alpha=0.32))   # ghost
     # TAP -> screenshot pops out and zooms up (price)
     shot = Image.open("frames/shot.png").convert("RGBA")
     card = Image.new("RGBA", (shot.width + 36, shot.height + 36), (255, 255, 255, 255)); card.paste(shot, (18, 18))
@@ -106,38 +116,45 @@ def v2_elements():
     E.append(Fn(T_POP, T_END, shotfx, z=6))
     E.append(El(13.95, 15.75, pill("拍卖得标价", 50), W / 2, 420, "pop", 0.15))
     E.append(El(14.12, 15.75, rich_text("RM[280千]", 130, hl_scale=1.15), W / 2, 1400, "slam", 0.15))
-    # comparison bars
+    # comparison bars (glass panel)
     bars = [(28.82, "新房", 600, "600多千", GREY), (30.30, "二手", 500, "500千", GREY), (32.18, "拍卖", 280, "280多千", GOLD)]
-    pnl = panel(900, 470)
+    E.append(Glass(27.76, 34.8, 900, 470, W / 2, 1230, out=0.2))
     def chart(c, tl, t):
-        fo = clamp((34.8 - t) / 0.2); place(c, pnl, W / 2, 1230, 0.92 + 0.08 * back_out(tl / 0.25), clamp(tl / 0.12) * fo)
-        place(c, rich_text("你会选哪一个？", 48, stroke=3), W / 2, 1060, 1, clamp(tl / 0.2) * fo)
+        fo = clamp((34.8 - t) / 0.2)
+        place(c, rich_text("你会选哪一个？", 48, light=True), W / 2, 1060, 1, clamp(tl / 0.2) * fo)
         for k, (tb, lab, val, txt, col) in enumerate(bars):
             if t < tb: continue
-            p = ease_out((t - tb) / 0.5); y = 1160 + k * 110; bw = int(520 * val / 700 * p)
-            bar = Image.new("RGBA", (max(bw, 1), 64), col + (255,))
-            c.alpha_composite(bar, (300, y - 32))
-            place(c, rich_text(lab, 46, stroke=3, shadow=False), 220, y, 1, clamp((t - tb) / 0.15) * fo)
-            place(c, rich_text(txt, 40, color=col, stroke=3, shadow=False), 300 + bw + 95, y, 1, clamp((t - tb - 0.3) / 0.2) * fo)
-    E.append(Fn(27.76, 34.8, chart))
-    E.append(El(27.76, 28.55, rich_text("所以我问你", 64), W / 2, SY, "pop", 0.08))
-    # 经营者 vs 消费者
-    pnl2 = panel(900, 330)
+            p = spring(t - tb, 0.6, 2.2); y = 1160 + k * 110; bw = max(int(520 * val / 700 * p), 1)
+            bar = Image.new("RGBA", (bw + 2, 56), (0, 0, 0, 0))
+            ImageDraw.Draw(bar).rounded_rectangle((0, 0, bw, 55), 28, fill=col + (235,))
+            c.alpha_composite(bar, (300, y - 28))
+            place(c, rich_text(lab, 46, shadow=False), 220, y, 1, clamp((t - tb) / 0.15) * fo)
+            place(c, rich_text(txt, 40, color=col, shadow=False), 300 + bw + 95, y, 1, clamp((t - tb - 0.3) / 0.2) * fo)
+    E.append(Fn(27.76, 34.8, chart, z=1))
+    E += words(27.76, 28.55, "所以我问你", 1530)
+    E += words(34.92, 35.90, "有一句话", WY)
+    # 经营者 vs 消费者 (glass panel)
+    E.append(Glass(35.9, 44.6, 900, 330, W / 2, 1250, out=0.2))
     def split(c, tl, t):
-        fo = clamp((44.6 - t) / 0.2); place(c, pnl2, W / 2, 1250, 0.92 + 0.08 * back_out(tl / 0.25), clamp(tl / 0.12) * fo)
+        fo = clamp((44.6 - t) / 0.2)
         if t >= 36.04:
             pulse = 1 + (0.08 * abs(math.sin((t - 40.66) * 5)) if 40.66 <= t < 42.5 else 0)
-            place(c, rich_text("先知先觉 → [经营者]", 62), W / 2, 1185, pulse, clamp((t - 36.04) / 0.15) * fo)
+            place(c, rich_text("先知先觉 → [经营者]", 62), W / 2, 1185, pulse * (0.7 + 0.3 * spring(t - 36.04)), clamp((t - 36.04) / 0.1) * fo)
         if t >= 38.52:
-            place(c, rich_text("后知后觉 → 消费者", 62, color=GREY), W / 2, 1315, 1, clamp((t - 38.52) / 0.15) * fo)
-    E.append(Fn(35.9, 44.6, split))
+            place(c, rich_text("后知后觉 → 消费者", 62, color=GREY, light=True), W / 2, 1315, 0.7 + 0.3 * spring(t - 38.52), clamp((t - 38.52) / 0.1) * fo)
+    E.append(Fn(35.9, 44.6, split, z=1))
+    E.append(El(40.66, 44.6, rich_text("经营者", 400, color=WHITE), W / 2, 600, "slam", 0.25, behind=True, alpha=0.28))   # ghost
+    E += words(40.66, 42.45, "你要成为/像我们这样的/经营者", 1500)
+    E += words(43.08, 44.50, "还是消费者？", 1500)
+    E += words(45.10, 46.50, "如果你想要/买到这样的property", WY)
     # BMV 50%
-    E.append(El(46.56, 48.2, rich_text("Below Market Value", 64), W / 2, 330, "up"))
+    E.append(El(46.56, 48.2, rich_text("Below Market Value", 60, light=True), W / 2, 400, "up", alpha=0.9))
     E.append(El(47.22, 48.2, rich_text("[50%]", 400, serif=True), W / 2, 680, "slam", 0.1, behind=True))
-    # CTA
-    E.append(El(48.24, 51.8, panel(860, 400), W / 2, 1180, "pop", 0))
-    E.append(El(48.24, 51.8, rich_text("下方留言", 72), W / 2, 1070, "up", 0))
+    # CTA (glass)
+    E.append(Glass(48.24, 51.8, 860, 400, W / 2, 1180, out=0))
+    E.append(El(48.24, 51.8, rich_text("下方留言", 64, light=True), W / 2, 1070, "up", 0))
     E.append(typewriter(48.70, 51.8, "AUCTION", W / 2, 1220, 110, 0.6))
+    E += stack(49.68, 51.8, [("我们教你也一样", 52, L), ("买得到", 110, A)], 1530, out=0)
     return E
 
 V2 = dict(src="src2/src.mp4", t_start=OFF2, dur=50.78,
