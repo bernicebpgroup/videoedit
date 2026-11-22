@@ -50,36 +50,44 @@ V1_SFX = [(0.0, "impact", -8), (2.9, "whoosh", -6), (2.92, "pop", -6), (4.20, "p
 
 # ================= VIDEO 2 =================
 OFF2 = 1.0   # trim first second (silence)
+from fx import text2, stack2, Impact, Neon, bubble, vs_card, price_drop
+from reel import glass_label, Glass
+from fx import ffont
+def _gl(*a, **k):
+    size = a[5] if len(a) > 5 else 48
+    return glass_label(*a, fnt=ffont("sans_medium", size), **k)
+
+# fonts: key words = 黑体特粗 (sans_black) with neon, small lines = 黑体中粗; all with deep shadow, no outlines.
+BIG, SMALL = "sans_black", "sans_medium"
+NEON_B = (120, 195, 255); ORANGE = (255, 150, 60)
+SAFE_Y = (270, 1500)          # IG safe zone (vertical)
+T_CR = 25.72                  # price crash moment
+
+def cap(t0, t1, small, big, cy=1120, neon=True, hl=NEON_B, bsize=170):
+    return stack2(t0, t1, [(text2(small, 66, SMALL), False), (text2(f"[{big}]" if neon else big, bsize, BIG, hl=hl, neon=neon), neon)], cy)
+
+def thin(t0, t1, text, cy=1180):
+    ch = [c for c in text.split("/") if c]; d = (t1 - t0) / len(ch)
+    return [El(t0 + k * d, t0 + (k + 1) * d if k < len(ch) - 1 else t1, text2(c, 64, SMALL), W / 2, cy, "pop", 0.06, alpha=0.92) for k, c in enumerate(ch)]
+
 def v2_elements():
-    """premium caption style: no outlines, one key phrase per sentence stacked in the centre,
-    thin semi-transparent chunk captions for filler, ghost words, frosted-glass cards + icons."""
-    E = []; CY = 1120; WY = 1180            # stacked-caption centre / thin-word line
-    B = dict(color=WHITE); A = dict(color=GOLD); L = dict(color=WHITE, light=True, alpha=0.95)
+    """premium/impact style: no outlines (deep shadow), one key phrase per sentence in the centre, neon key words,
+    impact slams, glass bubbles, VS card, price-drop board. All text inside the IG safe zone (y 270-1500, x < 950)."""
+    E = []
     # hook: 得标 huge, behind the speaker
-    E.append(El(1.0, 3.5, rich_text("刚刚", 72, light=True), W / 2 - 330, 300, "pop", 0.2, alpha=0.9))
-    E.append(El(1.0, 3.5, rich_text("[得标]！", 300, hl_scale=1.0), W / 2 + 30, 445, "slam", 0.2, behind=True))
-    E.append(glass_label(2.60, 3.5, "新鲜出炉", W / 2, 760, 46, ic="gavel"))
+    E.append(El(1.0, 3.5, text2("刚刚", 72, SMALL), W / 2 - 330, 320, "pop", 0.2))
+    E.append(El(1.0, 3.5, text2("[得标]！", 300, BIG, hl=NEON_B, neon=True), W / 2 + 30, 445, "slam", 0.2, behind=True))
+    E.append(_gl(2.60, 3.5, "新鲜出炉", W / 2, 760, 46, ic="gavel"))
     # location
-    E += stack(3.62, 5.55, [("这一个在", 68, L), ("KL", 150, A)], CY)
-    E.append(glass_label(3.62, 9.0, "Kuala Lumpur", W / 2, 330, 44, ic="pin"))
-    E += stack(5.84, 7.20, [("这一个", 68, L), ("Arte Plus", 130, B)], CY)
-    E += stack(7.28, 8.95, [("在", 68, L), ("Jalan Ampang", 112, B)], CY)
+    E += cap(3.62, 5.75, "这一个在", "KL", bsize=200)
+    E.append(_gl(3.62, 5.75, "Kuala Lumpur", W / 2, 340, 44, ic="pin"))
+    # VS card covers "这一个 Arte Plus / 在 Jalan Ampang"
+    E.append(vs_card(5.84, 9.0))
     # new-launch price
-    E += stack(9.00, 10.98, [("人家买新的", 68, L), ("六七百千", 150, B)], CY)
-    E.append(glass_label(9.42, 12.9, "新房 RM600–700千", W / 2, 330, 46, ic="house", ic_color=WHITE))
-    E += words(11.06, 11.58, "你自己看", WY)
-    E += stack(11.60, 12.80, [("我们刚标到", 68, L), ("多少钱？", 140, A)], CY)
-    E.append(El(13.95, 15.75, rich_text("拍卖得标价", 50, light=True), W / 2, 420, "pop", 0.15, alpha=0.9))
-    E.append(El(14.12, 15.75, rich_text("RM[280千]", 140, hl_scale=1.15), W / 2, 1400, "slam", 0.15))
-    # comparison
-    E += stack(15.86, 17.40, [("比别人", 68, L), ("便宜一倍", 160, A)], CY)
-    E.append(Glass(15.98, 17.40, 120, 120, W / 2 + 400, CY - 90, icon("down", 70, GOLD), radius=36))
-    E += stack(17.96, 19.50, [("买新的", 68, L), ("600多千", 150, B)], CY)
-    E += words(19.94, 21.80, "这是一个/中国人的名字/买到的", WY)
-    E += words(22.06, 23.30, "那么我们讲", WY)
-    E += stack(23.40, 25.30, [("现在市场", 68, L), ("500多千", 150, B)], CY)
-    E += stack(25.68, 27.50, [("才标", 68, L), ("280千", 170, A)], CY)
-    E.append(El(25.68, 27.50, rich_text("280", 620, color=WHITE), W / 2, 640, "slam", 0.2, behind=True, alpha=0.32))   # ghost
+    E += cap(9.00, 10.98, "人家买新的", "六七百千", neon=False)
+    E.append(_gl(9.42, 12.9, "新房 RM600–700千", W / 2, 340, 46, ic="house", ic_color=WHITE))
+    E += thin(11.06, 11.58, "你自己看")
+    E += cap(11.60, 12.80, "我们刚标到", "多少钱？")
     # TAP -> screenshot pops out and zooms up (price)
     shot = Image.open("frames/shot.png").convert("RGBA")
     card = Image.new("RGBA", (shot.width + 36, shot.height + 36), (255, 255, 255, 255)); card.paste(shot, (18, 18))
@@ -114,57 +122,60 @@ def v2_elements():
         else:
             q = ease_io((t - T_OUT) / (T_END - T_OUT)); place(c, CARD, W / 2 + q * 200, 900 - q * 300, 1 - 0.75 * q, 1 - q, 1.5 + 8 * q)
     E.append(Fn(T_POP, T_END, shotfx, z=6))
-    E.append(El(13.95, 15.75, pill("拍卖得标价", 50), W / 2, 420, "pop", 0.15))
-    E.append(El(14.12, 15.75, rich_text("RM[280千]", 130, hl_scale=1.15), W / 2, 1400, "slam", 0.15))
-    # comparison bars (glass panel)
-    bars = [(28.82, "新房", 600, "600多千", GREY), (30.30, "二手", 500, "500千", GREY), (32.18, "拍卖", 280, "280多千", GOLD)]
-    E.append(Glass(27.76, 34.8, 900, 470, W / 2, 1230, out=0.2))
-    def chart(c, tl, t):
-        fo = clamp((34.8 - t) / 0.2)
-        place(c, rich_text("你会选哪一个？", 48, light=True), W / 2, 1060, 1, clamp(tl / 0.2) * fo)
-        for k, (tb, lab, val, txt, col) in enumerate(bars):
-            if t < tb: continue
-            p = spring(t - tb, 0.6, 2.2); y = 1160 + k * 110; bw = max(int(520 * val / 700 * p), 1)
-            bar = Image.new("RGBA", (bw + 2, 56), (0, 0, 0, 0))
-            ImageDraw.Draw(bar).rounded_rectangle((0, 0, bw, 55), 28, fill=col + (235,))
-            c.alpha_composite(bar, (300, y - 28))
-            place(c, rich_text(lab, 46, shadow=False), 220, y, 1, clamp((t - tb) / 0.15) * fo)
-            place(c, rich_text(txt, 40, color=col, shadow=False), 300 + bw + 95, y, 1, clamp((t - tb - 0.3) / 0.2) * fo)
-    E.append(Fn(27.76, 34.8, chart, z=1))
-    E += words(27.76, 28.55, "所以我问你", 1530)
-    E += words(34.92, 35.90, "有一句话", WY)
+    E.append(El(13.95, 15.75, text2("拍卖得标价", 50, SMALL), W / 2, 420, "pop", 0.15))
+    E.append(Impact(14.06, 15.75, text2("RM[280千]", 130, BIG, hl=NEON_B, neon=True), W / 2, 1430, z=7, flash=False))
+    # impact: 便宜一倍
+    E.append(El(15.86, 17.4, text2("比别人", 66, SMALL), W / 2, 610, "pop", 0.12))
+    E.append(Impact(15.92, 17.4, text2("[便宜一倍]", 190, BIG, hl=NEON_B, neon=True), W / 2, 760))
+    E += cap(17.96, 19.50, "买新的", "600多千", neon=False)
+    E += thin(19.94, 21.80, "这是一个/中国人的名字/买到的")
+    E += thin(22.06, 22.85, "那么我们讲")
+    # price drop: 600 -> 500 (现在市场500多千) -> crash 280 (才标280千)
+    E.append(price_drop(22.9, 23.55, T_CR, 27.75))
+    # bubbles replace the bar chart: 你会选哪一个？
+    E += thin(27.76, 28.55, "所以我问你")
+    E += cap(28.6, 34.8, "你会选", "哪一个？", cy=1150)
+    E.append(bubble(28.82, 34.8, 300, 420, "新房", "RM600多千", "市场价", WHITE, "house"))
+    E.append(bubble(30.30, 34.8, 740, 400, "二手", "RM500千", "现在市场", ORANGE, None, glow=True))
+    E.append(bubble(32.18, 34.8, 520, 650, "拍卖", "RM280多千", "得标价", NEON_B, "check", glow=True, w=470))
+    E += thin(34.92, 35.90, "有一句话")
     # 经营者 vs 消费者 (glass panel)
-    E.append(Glass(35.9, 44.6, 900, 330, W / 2, 1250, out=0.2))
+    E.append(Glass(35.9, 44.6, 900, 330, W / 2, 1120, out=0.2))
     def split(c, tl, t):
         fo = clamp((44.6 - t) / 0.2)
         if t >= 36.04:
             pulse = 1 + (0.08 * abs(math.sin((t - 40.66) * 5)) if 40.66 <= t < 42.5 else 0)
-            place(c, rich_text("先知先觉 → [经营者]", 62), W / 2, 1185, pulse * (0.7 + 0.3 * spring(t - 36.04)), clamp((t - 36.04) / 0.1) * fo)
+            place(c, SPL1, W / 2, 1055, pulse * (0.7 + 0.3 * spring(t - 36.04)), clamp((t - 36.04) / 0.1) * fo)
         if t >= 38.52:
-            place(c, rich_text("后知后觉 → 消费者", 62, color=GREY, light=True), W / 2, 1315, 0.7 + 0.3 * spring(t - 38.52), clamp((t - 38.52) / 0.1) * fo)
+            place(c, SPL2, W / 2, 1185, 0.7 + 0.3 * spring(t - 38.52), clamp((t - 38.52) / 0.1) * fo)
+    SPL1 = text2("先知先觉 → [经营者]", 64, BIG, hl=NEON_B, neon=True); SPL2 = text2("后知后觉 → 消费者", 60, SMALL, color=GREY)
     E.append(Fn(35.9, 44.6, split, z=1))
-    E.append(El(40.66, 44.6, rich_text("经营者", 400, color=WHITE), W / 2, 600, "slam", 0.25, behind=True, alpha=0.28))   # ghost
-    E += words(40.66, 42.45, "你要成为/像我们这样的/经营者", 1500)
-    E += words(43.08, 44.50, "还是消费者？", 1500)
-    E += words(45.10, 46.50, "如果你想要/买到这样的property", WY)
+    E.append(El(40.66, 44.6, text2("经营者", 400, BIG, shadow=None), W / 2, 600, "slam", 0.25, behind=True, alpha=0.3))   # ghost
+    E += thin(40.66, 42.45, "你要成为/像我们这样的/经营者", 1390)
+    E += thin(43.08, 44.50, "还是消费者？", 1390)
+    E += thin(45.10, 46.50, "如果你想要/买到这样的property")
     # BMV 50%
-    E.append(El(46.56, 48.2, rich_text("Below Market Value", 60, light=True), W / 2, 400, "up", alpha=0.9))
-    E.append(El(47.22, 48.2, rich_text("[50%]", 400, serif=True), W / 2, 680, "slam", 0.1, behind=True))
+    E.append(El(46.56, 48.2, text2("Below Market Value", 60, SMALL), W / 2, 400, "up"))
+    E.append(El(47.22, 48.2, text2("[50%]", 380, BIG, hl=NEON_B, neon=True), W / 2, 690, "slam", 0.1, behind=True))
     # CTA (glass)
-    E.append(Glass(48.24, 51.8, 860, 400, W / 2, 1180, out=0))
-    E.append(El(48.24, 51.8, rich_text("下方留言", 64, light=True), W / 2, 1070, "up", 0))
-    E.append(typewriter(48.70, 51.8, "AUCTION", W / 2, 1220, 110, 0.6))
-    E += stack(49.68, 51.8, [("我们教你也一样", 52, L), ("买得到", 110, A)], 1530, out=0)
+    E.append(Glass(48.24, 51.8, 860, 440, W / 2, 1200, out=0))
+    E.append(El(48.24, 51.8, text2("下方留言", 64, SMALL), W / 2, 1060, "up", 0))
+    E.append(typewriter(48.70, 51.8, "AUCTION", W / 2, 1200, 110, 0.6, fnt=ffont("sans_black", 110)))
+    E.append(El(49.68, 51.8, text2("我们教你也一样[买得到]", 54, SMALL, hl=NEON_B, hl_fam=BIG, neon=True), W / 2, 1345, "pop", 0))
     return E
 
 V2 = dict(src="src2/src.mp4", t_start=OFF2, dur=50.78,
           grade="eq=contrast=1.07:saturation=1.06,colorbalance=bs=0.03,vignette=PI/5",
           zoom=[(1.0, 1.0, 540, 900, 0), (13.40, 1.12, 400, 840, 0.25), (16.05, 1.0, 540, 900, 0.35),
-                (22.06, 1.1, 540, 800, 0.25), (27.76, 1.0, 540, 900, 0.3), (34.92, 1.12, 540, 760, 0.25),
+                (22.06, 1.1, 540, 800, 0.25), (22.9, 1.0, 540, 900, 0.3), (34.92, 1.12, 540, 760, 0.25),
                 (40.66, 1.0, 540, 900, 0.3), (45.10, 1.12, 540, 760, 0.25), (48.24, 1.0, 540, 900, 0.3)],
-          shakes=[(2.14, 12), (14.0, 10), (32.92, 10), (47.22, 12)])
-V2_SFX = [(2.14, "impact", 0), (2.60, "pop", -6), (3.62, "whoosh", -6), (7.28, "pop", -6), (9.42, "whoosh", -6),
-          (12.6, "riser", -7), (13.40, "click", -2), (13.58, "shutter", -2), (13.62, "whoosh", -5), (14.0, "impact", 0),
-          (14.12, "pop", -5), (14.70, "ding", -5), (15.70, "whoosh", -9), (27.76, "whoosh", -6), (28.82, "ding", -6), (30.30, "ding", -6), (32.18, "ding", -3),
-          (32.92, "impact", -3), (35.9, "whoosh", -6), (36.04, "pop", -4), (38.52, "pop", -6), (46.56, "whoosh", -6),
+          shakes=[(2.14, 12), (14.2, 12), (16.06, 16), (6.64, 10), (T_CR + 0.55, 18), (32.18, 8), (47.22, 12)])
+V2_SFX = [(2.14, "impact", 0), (2.60, "pop", -6), (3.62, "whoosh", -6), (3.70, "pop", -5),
+          (5.84, "whoosh", -4), (6.06, "pop", -4), (6.29, "pop", -4), (6.64, "impact", -2), (9.0, "whoosh", -6), (9.42, "pop", -6),
+          (11.60, "pop", -5), (12.6, "riser", -7), (13.40, "click", -2), (13.58, "shutter", -2), (13.62, "whoosh", -5),
+          (14.2, "impact", 0), (14.70, "ding", -5), (15.70, "whoosh", -6), (15.80, "whoosh", -6), (16.06, "impact", 0),
+          (17.96, "pop", -5), (22.9, "whoosh", -6), (23.55, "ding", -6), (T_CR - 0.9, "riser", -6), (T_CR, "whoosh", -2),
+          (T_CR + 0.55, "impact", 0), (T_CR + 0.75, "pop", -3), (T_CR + 0.8, "chime", -6), (27.76, "whoosh", -7),
+          (28.82, "pop", -4), (30.30, "pop", -4), (32.18, "ding", -3), (32.25, "impact", -4), (35.9, "whoosh", -6),
+          (36.04, "pop", -4), (38.52, "pop", -6), (40.66, "impact", -6), (46.56, "whoosh", -6),
           (47.22, "impact", -1), (48.24, "whoosh", -6)] + [(48.70 + k * 0.085, "click", -4) for k in range(7)] + [(49.68, "chime", -5)]

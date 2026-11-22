@@ -98,8 +98,8 @@ class Fn:
 def sub(t0, t1, text, y, size=68):
     return El(t0, t1, rich_text(text, size), W / 2, y, "pop", 0.08)
 
-def typewriter(t0, t1, text, cx, cy, size, t_type, box=True, cursor=True):
-    f = font(size); full = text
+def typewriter(t0, t1, text, cx, cy, size, t_type, box=True, cursor=True, fnt=None):
+    f = fnt or font(size); full = text
     def draw(c, tl, t):
         n = int(clamp(tl / t_type) * len(full) + 0.999) if tl < t_type else len(full)
         s = full[:n] + ("|" if cursor and (int(t * 2.5) % 2 == 0 or tl < t_type) else " ")
@@ -169,9 +169,9 @@ class Glass:
         c.alpha_composite(bd, (x0, y0)) if x0 >= 0 and y0 >= 0 and x0 + w <= W and y0 + h <= H else None
         if self.content is not None: place(c, self.content, self.cx, self.cy + dy, s, o)
 
-def glass_label(t0, t1, text, cx, cy, size=48, ic=None, ic_color=GOLD, **kw):
+def glass_label(t0, t1, text, cx, cy, size=48, ic=None, ic_color=GOLD, fnt=None, **kw):
     """glass pill with optional icon + soft text."""
-    f = font(size); b = f.getbbox(text); tw = b[2] - b[0]; isz = int(size * 1.15) if ic else 0
+    f = fnt or font(size); b = f.getbbox(text); tw = b[2] - b[0]; isz = int(size * 1.15) if ic else 0
     w = tw + isz + (24 if ic else 0) + 80; h = int(size * 2.0)
     spr = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(spr); x = 40
     if ic: spr.alpha_composite(icon(ic, isz, ic_color), (x, (h - isz) // 2)); x += isz + 24

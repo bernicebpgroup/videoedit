@@ -65,7 +65,7 @@ class Neon(El):
         super().__init__(t0, t1, spr, cx, cy, "pop", out, 0, z, behind, alpha)
     def draw(self, c, t):
         if not (self.t0 <= t < self.t1): return
-        a = t - self.t0; o = clamp((self.t1 - t) / self.out) * self.alpha
+        a = t - self.t0; o = (clamp((self.t1 - t) / self.out) if self.out else 1) * self.alpha
         fl = 1.0
         if a < 0.32: fl = [0.2, 1, 0.35, 1, 0.6, 1, 1, 1][min(7, int(a / 0.04))]
         p = spring(a, 0.4, 3.4); s = 0.5 + 0.5 * p
@@ -138,32 +138,33 @@ def load_photo(path, w, h):
         x0, y0 = (im.width - w) // 2, (im.height - h) // 2; return im.crop((x0, y0, x0 + w, y0 + h)), True
     return placeholder_building(w, h), False
 
-def vs_card(t0, t1, photo="frames/building.jpg", z=6):
-    """full-screen graphic: building photo top, neon title, VS badge, two price slips (新房 vs 拍卖)."""
-    ph, real = load_photo(photo, W, 1150)
+def vs_card(t0, t1, photo="frames/building.jpg", z=6, title="这一个 Arte Plus", sub="Jalan Ampang · Kuala Lumpur"):
+    """full-screen graphic: photo (or blurred live frame if no photo) top, neon 新房 VS 拍卖, VS badge, two price slips.
+    Everything kept inside the IG safe zone."""
+    real = os.path.exists(photo); ph = load_photo(photo, W, 1150)[0] if real else None
     def draw(c, tl, t):
         o = clamp(tl / 0.12) * clamp((t1 - t) / 0.2)
         if o <= 0: return
-        g = Image.new("RGBA", (W, H), (10, 16, 28, 255))
-        zoom = 1.0 + 0.04 * tl; pw, phh = int(W * zoom), int(1150 * zoom)
-        g.paste(ph.resize((pw, phh)).crop(((pw - W) // 2, 0, (pw - W) // 2 + W, 1150)), (0, 0))
-        fade = Image.new("L", (1, 1150)); [fade.putpixel((0, y), int(255 * clamp((y - 700) / 450))) for y in range(1150)]
-        g.paste(Image.new("RGBA", (W, 1150), (10, 16, 28, 255)), (0, 0), fade.resize((W, 1150)))
-        c.alpha_composite(Image.blend(c, g, 1.0) if o >= 1 else Image.blend(c.copy(), g, o))
-        # title
+        if real:
+            g = Image.new("RGBA", (W, H), (10, 16, 28, 255)); zoom = 1.0 + 0.04 * tl; pw, phh = int(W * zoom), int(1150 * zoom)
+            g.paste(ph.resize((pw, phh)).crop(((pw - W) // 2, 0, (pw - W) // 2 + W, 1150)), (0, 0))
+            fade = Image.linear_gradient("L").resize((W, 450)); g.paste(Image.new("RGBA", (W, 450), (10, 16, 28, 255)), (0, 700), fade)
+        else:
+            g = c.filter(ImageFilter.GaussianBlur(26)); g.alpha_composite(Image.new("RGBA", (W, H), (8, 14, 26, 175)))
+        c.alpha_composite(Image.blend(c.copy(), g, o))
         p = spring(tl - 0.1, 0.45, 3.2)
-        place(c, TITLE1, W / 2, 330 + 30 * (1 - p), 0.6 + 0.4 * p, clamp((tl - 0.1) / 0.05) * o)
+        place(c, TITLE1, W / 2, 400 + 30 * (1 - p), 0.6 + 0.4 * p, clamp((tl - 0.1) / 0.05) * o)
         p2 = spring(tl - 0.22, 0.4, 3.4); fl = [0.2, 1, 0.4, 1, 1][min(4, int(max(0, tl - 0.22) / 0.05))]
-        place(c, TITLE2, W / 2, 470 + 30 * (1 - p2), 0.5 + 0.5 * p2, clamp((tl - 0.22) / 0.04) * fl * o)
-        # slips
-        for k, (sp, cx, ang, td) in enumerate([(SLIP_L, 280, -5, 0.45), (SLIP_R, 800, 5, 0.6)]):
+        place(c, TITLE2, W / 2, 545 + 30 * (1 - p2), 0.5 + 0.5 * p2, clamp((tl - 0.22) / 0.04) * fl * o)
+        place(c, SUB, W / 2, 680, 1, clamp((tl - 0.4) / 0.2) * o)
+        for k, (sp, cx, ang, td) in enumerate([(SLIP_L, 300, -5, 0.45), (SLIP_R, 760, 5, 0.6)]):
             q = spring(tl - td, 0.5, 2.8)
-            place(c, sp, cx, 1500 + 400 * (1 - q), 1, clamp((tl - td) / 0.05) * o, ang)
+            place(c, sp, cx, 1250 + 400 * (1 - q), 1, clamp((tl - td) / 0.05) * o, ang)
         q = spring(tl - 0.8, 0.35, 3.6)
-        place(c, VS, W / 2, 1230, 0.2 + 0.8 * q, clamp((tl - 0.8) / 0.04) * o, -10 * (1 - q))
-        if not real: place(c, NOTE, W / 2, 1880, 1, 0.6 * o)
-    TITLE1 = text2("这一个 Arte Plus", 70, "sans_black", shadow="deep")
-    TITLE2 = text2("[新房 VS 拍卖]", 150, "sans_black", hl=(150, 205, 255), shadow="deep", neon=True)
+        place(c, VS, 530, 1000, 0.2 + 0.8 * q, clamp((tl - 0.8) / 0.04) * o, -10 * (1 - q))
+    TITLE1 = text2(title, 70, "sans_black", shadow="deep")
+    TITLE2 = text2("[新房 VS 拍卖]", 140, "sans_black", hl=(150, 205, 255), shadow="deep", neon=True)
+    SUB = text2(sub, 40, "sans_medium", color=(220, 228, 240), shadow="deep")
     def slip(title, price, accent, mark):
         s = Image.new("RGBA", (440, 330), (0, 0, 0, 0)); d = ImageDraw.Draw(s)
         sh = Image.new("L", s.size, 0); ImageDraw.Draw(sh).rounded_rectangle((14, 20, 426, 320), 24, fill=150)
@@ -181,7 +182,6 @@ def vs_card(t0, t1, photo="frames/building.jpg", z=6):
     m = Image.new("L", VS.size, 0); ImageDraw.Draw(m).ellipse((25, 25, 205, 205), fill=255); VS.alpha_composite(_glow(m, (0, 0, 0), 12, 0.9))
     dv.ellipse((25, 25, 205, 205), fill=WHITE, outline=(20, 26, 40), width=6)
     fv = ffont("sans_black", 90); b = fv.getbbox("VS"); dv.text((115 - (b[2] - b[0]) / 2 - b[0], 115 - (b[3] - b[1]) / 2 - b[1]), "VS", font=fv, fill=(20, 26, 40))
-    NOTE = text2("（占位图：请提供 Arte Plus 大楼照片）", 30, "sans_medium", shadow="soft")
     return Fn(t0, t1, draw, z=z)
 
 # ---------------- Instagram safe zone ----------------
