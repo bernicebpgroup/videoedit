@@ -2,3 +2,4 @@ src2/
 /frames/
 out/
 *.mp4
+__pycache__/
