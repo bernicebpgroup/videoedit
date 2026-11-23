@@ -127,3 +127,16 @@
 - 主体：每 1–3 秒一次视觉变化（F 风格 0.3–0.6 秒）
 - 章节编号 1、2、3…
 - 结尾 CTA：评论/私信关键词
+
+## 13. 音效库和音乐库（真实素材，不用合成）
+这个环境只能连 GitHub / npm / PyPI，所以用 GitHub 上的免费库：
+- **音效：`wyzowl/sfx-kit`**（CC0，免署名，可商用）：320 个 WAV，48kHz。`sounds.json` 里每个音效都有 `use_for`、`sync.at`（同步点）、`under_voiceover_db`（人声下要降多少）。
+  - 下载：`GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/wyzowl/sfx-kit`
+  - 放置规则：音效开始时间 = 画面动作时间 − `sync.at`
+  - 常用对照：光点飞入 `shimmer-short-sparkle` + `whoosh-fast-soft`；卡片弹出 `pop-large-in`；面板展开 `whoosh-medium-soft`；清单逐条 `tone-step-1`…`tone-step-5`；数字落定 `data-number-land`；数字跳动 `data-tick` / `data-countup-*`；价格下降 `data-decrease-short`；重点大字 `boom-hit-medium`；重点前铺垫 `riser-1s-soft`；转场 `whoosh-medium-medium`；奖励/亮点 `shimmer-medium-sparkle`；结尾 logo `sting-bright-short`
+- **音乐：`seyedpouramir/alvana-audio`**：每首有 `.json`（bpm、beats、energy 曲线）
+  - 下载（只拿需要的分类）：`git clone --depth 1 --filter=blob:none --no-checkout https://github.com/seyedpouramir/alvana-audio` → sparse-checkout `/music/<分类>/`
+  - CC0 免署名：HoliznaCC0 的所有曲目（ambient、calm、chill、intro、upbeat、lofi、synthwave…）
+  - **`music/corporate/*`（Sascha Ende）是 CC BY 4.0，要在文案里署名**
+  - 选段：从 energy ≥ 60 的地方开始、对齐 beat；人声时音乐压低约 9 dB；切场景时可以把音乐拿掉 0.3 秒
+- 混音脚本：`tools/reel/audio_real.py`（在 edits/book-reel 分支）
