@@ -71,5 +71,5 @@ V1_EVENTS = (
 )
 if __name__ == "__main__":
     voice, out, music = sys.argv[1], sys.argv[2], (sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] != "none" else None)
-    build(voice, 26.6, V1_EVENTS, sys.argv[4], music, out, lowcut=[(9.62, 9.95), (16.55, 16.80)])
+    build(voice, 26.6, V1_EVENTS, sys.argv[4], music, out, music_db=-21, duck_db=-7, lowcut=[(9.62, 9.95), (16.55, 16.80)])
     print("ok")
