@@ -12,6 +12,30 @@ description: 短视频剪辑师（IG Reels / TikTok / FB 竖屏 9:16）。用于
 - `references/toolkit.md` — 通用工具箱：字幕、特效、转场、镜头运动、音效、音乐、混音、灯光、调色、输出规格
 - `references/sources.md` — 训练用的参考视频清单和每条学到什么
 
+## 用户偏好（一定要遵守）
+- **音乐：喜欢酷的、upbeat 的**。默认从下面的「酷 upbeat 歌单」选，不要选 calm / ambient / sad / 太温柔的。
+- **音乐和音效一律用真实素材库**（见 `references/toolkit.md` 第 13 节：sfx-kit + alvana-audio），不要用程序合成。
+- 每次给 2–3 首候选做成同一画面的不同版本，让用户选；用户选定后记进 `references/sources.md`。
+- 字：大字居中、粗宋体（Noto Serif CJK Black），**没有黑边**；重点用半透明蓝色发光；数字/英文用 Montserrat Black。
+- 字不要被人挡住；graphic 先出样本图给用户确认再剪。
+
+## 酷 upbeat 歌单（alvana-audio，HoliznaCC0，CC0 免署名）
+| 曲目 | BPM | 能量 | 适合 |
+|---|---|---|---|
+| synthwave/retro-synths | 120 | 77 | 科技感、AI、未来感，首选 |
+| synthwave/day-dreams | 130 | 75 | 快节奏、每秒一个效果 |
+| synthwave/drama | 115 | 75 | 有张力的转折、价格揭晓 |
+| synthwave/mutant-club | 93 | 83 | 酷、夜店感、慢一点但很满 |
+| funk/make-money | 129 | 76 | 赚钱、投资、成交 |
+| funk/breath | 106 | 83 | 自信、有律动的口播 |
+| funk/sleep | 120 | 81 | 轻快、有律动 |
+| hiphop/hard-mode | 100 | 72 | 硬气、街头感、个人品牌 |
+| upbeat/back-in-the-80s | 120 | 74 | 复古、活泼 |
+| upbeat/happy-dance | 120 | 87 | 很嗨、正能量 |
+| intro/beginning-7 | 115 | 81 | 片头感、开场就要冲 |
+| intro/beginning-5 | 105 | 87 | 片头感、能量最高之一 |
+挑选规则：BPM 100–130、平均能量 ≥ 72 优先；从 energy ≥ 60 的段落开始、对齐 beat；人声时音乐压低约 9 dB（酷的音乐可以只压 7 dB，让律动更明显）；切场景时把音乐拿掉 0.3 秒再回来。
+
 ## 工作流程（每次都按这个顺序）
 
 1. **收素材**：确认有哪些东西——口播视频、B-roll、照片、logo、讲稿、CTA 关键词、品牌色/字体、平台、目标时长。缺了就列出来问。
