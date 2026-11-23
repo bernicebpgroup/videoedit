@@ -18,6 +18,11 @@ description: 短视频剪辑师（IG Reels / TikTok / FB 竖屏 9:16）。用于
 - 每次给 2–3 首候选做成同一画面的不同版本，让用户选；用户选定后记进 `references/sources.md`。
 - 字：大字居中、粗宋体（Noto Serif CJK Black），**没有黑边**；重点用半透明蓝色发光；数字/英文用 Montserrat Black。
 - 字不要被人挡住；graphic 先出样本图给用户确认再剪。
+- **不要调色**：保持原片颜色（不加 contrast / saturation / 暗角 / 冷暖调），除非用户要求。
+- 原片已有烧进去的字幕时：用半透明玻璃条盖住（要盖到 y≈1645，放大镜头会把旧字幕往下推），新字幕放玻璃条上。
+- 原片已有背景音乐时：用 audio-separator（Kim_Vocal_2.onnx，模型从 GitHub 下载）抽出人声，再配我们的音乐。
+- B-roll 一律换成蓝色 graphic（图表、对比卡、清单、listing 卡），可以把 B-roll 画面放进玻璃卡里当照片。
+- 结尾品牌 logo 换成 CTA：最后画面模糊 + 玻璃卡「下方留言「关键词」」。
 
 ## 酷 upbeat 歌单（alvana-audio，HoliznaCC0，CC0 免署名）
 | 曲目 | BPM | 能量 | 适合 |
