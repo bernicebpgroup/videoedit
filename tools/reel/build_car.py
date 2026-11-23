@@ -3,7 +3,7 @@ sys.path.insert(0, sys.argv[1])
 from reel import render
 import audio_real
 SP = importlib.import_module(sys.argv[2]); base, vocals, out, music = sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6]
-G = "eq=contrast=1.05:saturation=1.08,colorbalance=bs=0.03,vignette=PI/5"
+G = "null"
 t0 = time.time()
 n = render(base, out + ".video.mp4", 0.0, SP.DUR, SP.ZOOM, SP.elements(), G, SP.SHAKES)
 print("frames", n, round(time.time() - t0), "s", flush=True)
