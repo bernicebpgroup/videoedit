@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>影片风格预览器</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&family=Noto+Sans+SC:wght@500;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a calm editing-suite inspector, tool first
+   IDEA: the phone preview is the monitor; the right column is an edit app's inspector
+   PICTURE: the live 9:16 preview of the user's own clip, large, left
+   COLOUR and TYPE: neutral paper/graphite UI so the chosen style and accent carry all colour; Inter + Noto Sans SC
+   LAYOUT: monitor left, inspector right; stacks under 860px */
+@font-face{font-family:"VE Playfair";font-weight:700;font-style:normal;src:url(fonts/playfair-display-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Playfair";font-weight:900;font-style:normal;src:url(fonts/playfair-display-latin-900-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Playfair";font-weight:700;font-style:italic;src:url(fonts/playfair-display-latin-700-italic.woff2) format("woff2")}
+@font-face{font-family:"VE Playfair";font-weight:400;font-style:italic;src:url(fonts/playfair-display-latin-400-italic.woff2) format("woff2")}
+@font-face{font-family:"VE Crimson";font-weight:700;font-style:italic;src:url(fonts/crimson-text-latin-700-italic.woff2) format("woff2")}
+@font-face{font-family:"VE Montserrat";font-weight:900;font-style:normal;src:url(fonts/montserrat-latin-900-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Montserrat";font-weight:900;font-style:italic;src:url(fonts/montserrat-latin-900-italic.woff2) format("woff2")}
+@font-face{font-family:"VE Montserrat";font-weight:300;font-style:normal;src:url(fonts/montserrat-latin-300-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Montserrat";font-weight:300;font-style:italic;src:url(fonts/montserrat-latin-300-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Anton";src:url(fonts/anton-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Mono";font-weight:700;src:url(fonts/space-mono-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Inter";font-weight:500;src:url(fonts/inter-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Inter";font-weight:600;src:url(fonts/inter-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Inter";font-weight:800;src:url(fonts/inter-latin-800-normal.woff2) format("woff2")}
+@font-face{font-family:"VE Inter";font-weight:300;src:url(fonts/inter-latin-500-normal.woff2) format("woff2")}
+:root{color-scheme:light dark;--bg:light-dark(#f4f3ef,#141412);--panel:light-dark(#ffffff,#1d1d1b);--ink:light-dark(#1b1b19,#efeee9);--mute:light-dark(#6b6a64,#a3a29b);--line:light-dark(#e2e0d8,#33332f);--sel:light-dark(#1b1b19,#efeee9);--selink:light-dark(#ffffff,#141412)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "VE Inter","Noto Sans SC",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:1180px;margin:0 auto;padding:clamp(16px,3vw,36px) max(4vw,14px);display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:start}
+h1{font-size:clamp(24px,3vw,32px);line-height:1.1;margin:0 0 6px;font-weight:800;text-wrap:balance}
+.lede{color:var(--mute);margin:0 0 18px;font-size:14px}
+.mon{position:sticky;top:16px}
+.screen{position:relative;aspect-ratio:9/16;width:100%;max-height:calc(100vh - 150px);margin:0 auto;border-radius:22px;overflow:hidden;background:#111;box-shadow:0 0 0 1px var(--line)}
+.screen canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+.transport{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.seek{flex:1 1 120px;accent-color:var(--ink)}
+button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;min-height:40px;padding:6px 12px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+button[aria-pressed=true]{background:var(--sel);color:var(--selink);border-color:var(--sel)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:4px 18px}
+.sec{padding:16px 0;border-bottom:1px solid var(--line)}.sec:last-child{border-bottom:0}
+.sec h2{font-size:14px;font-weight:600;margin:0 0 10px;color:var(--mute)}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.styles{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.styles button{text-align:left;padding:8px 10px;line-height:1.25}
+.styles small{display:block;font-size:12px;opacity:.7}
+.font b{display:block;font-size:22px;line-height:1.15;font-weight:400}
+.font small{display:block;font-size:12px;opacity:.75}
+.font{text-align:left;padding:8px 12px}
+.sw{width:40px;height:40px;border-radius:50%;padding:0;border:2px solid var(--line)}
+.sw[aria-pressed=true]{outline:3px solid var(--ink);outline-offset:2px}
+input[type=text]{font:inherit;font-size:16px;width:100%;min-height:40px;border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--bg);color:var(--ink)}
+input[type=color]{width:44px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:3px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+label.f{display:block;font-size:12px;color:var(--mute);margin-bottom:3px}
+.note{font-size:13px;color:var(--mute);margin:8px 0 0}
+.out{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px dashed var(--line);font-size:14px;word-break:break-all}
+.go{background:var(--sel);color:var(--selink);border-color:var(--sel);font-weight:600;width:100%;min-height:48px}
+@media(max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)}.mon{position:static}.screen{max-width:380px;max-height:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mon">
+    <h1>影片风格预览器</h1>
+    <p class="lede">点右边的选项，影片上的效果马上换。片段是你上传的口播视频前 11 秒。</p>
+    <div class="screen"><canvas id="out" aria-label="影片预览"></canvas></div>
+    <div class="transport">
+      <button id="play">暂停</button>
+      <input id="seek" class="seek" type="range" min="0" max="1133" step="1" value="0" aria-label="时间">
+      <button id="snd" aria-pressed="false">声音</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button data-jump="0.6">钩子</button><button data-jump="2.8">卡片</button><button data-jump="5.6">重点段</button><button data-jump="8.9">结尾</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="sec"><h2>风格</h2><div class="styles" id="styles"></div>
+      <p class="note">换风格时字体和颜色会换成那个风格的默认，之后可以再改。</p></div>
+    <div class="sec"><h2>关键词字体</h2><div class="row" id="fonts"></div></div>
+    <div class="sec"><h2>重点颜色</h2><div class="row" id="colors" style="align-items:center"></div></div>
+    <div class="sec"><h2>效果</h2><div class="row">
+      <button id="glow" aria-pressed="false">大字发光</button><button id="stroke" aria-pressed="false">大字黑边</button><button id="subs" aria-pressed="false">底部完整字幕</button></div></div>
+    <div class="sec"><h2>画面上的字（可以直接改）</h2><div class="grid2" id="fields"></div></div>
+    <div class="sec">
+      <button class="go" id="done">就用这个，复制设定</button>
+      <div class="out" id="out-line" role="status"></div>
+      <p class="note">把复制的设定贴回 chat，再附上口播稿，我就照这个出完整 mp4。成片和这里用的是同一套画法。</p>
+    </div>
+  </div>
+</div>
+<video id="vid" src="clip.mp4" muted loop playsinline autoplay style="display:none"></video>
+<script src="engine.js"></script>
+<script>
+{
+const SDESC = {A: '指令→成片', B: '优雅干货', C: '前后对比', D: 'N 个重点', E: '干净字幕', F: '潮流设计', G: '放大放小', H: '字在人后', I: '3D 飘带'};
+const SAMPLE = {serif_black: '拍卖赢家', serif_italic: 'editors', playfair_italic: 'Elegant', sans_black: '拍卖赢家', montserrat: 'RM 380K', montserrat_italic: 'EDITA', anton: 'AUCTION', mono: 'product'};
+const COLORS = [['#D4F23A','荧光黄绿'],['#3B82F6','蓝色'],['#312F92','品牌深蓝'],['#C9A227','金色'],['#FF7A1A','橘色'],['#5FE0C8','薄荷绿'],['#445A3F','墨绿'],['#B4552F','陶土橘']];
+const FIELDS = [['big','关键词大字'],['small','引导小字'],['pill','标签 / 评论气泡'],['ring','重点段文字'],['c0','重点 1'],['c1','重点 2'],['c2','重点 3'],['cta','留言关键词'],['brand','名字 / 品牌'],['phone','电话'],['sub','底部字幕']];
+const def = {style: 'I', font: 'serif_italic', accent: '#D4F23A', glow: false, stroke: false, subs: false,
+  big: 'Where', small: 'to find', pill: 'where to find', ring: 'WHERE TO FIND', c0: 'Location', c1: 'Property', c2: 'Search', cta: 'EDIT', brand: 'BP Auction', phone: '012-345 6789', sub: '这里会显示你说的每一句话'};
+let st = {...def};
+try { const s = JSON.parse(localStorage.getItem('pv-styles') || 'null'); if (s) st = {...def, ...s}; } catch (e) {}
+const save = () => { try { localStorage.setItem('pv-styles', JSON.stringify(st)); } catch (e) {} };
+
+const vid = document.getElementById('vid'), out = document.getElementById('out');
+let data = {face: [[216, 341]], rms: [0.3]};
+const E = VE.Engine(out, vid, data, {scale: 1});
+fetch('data.json').then(r => r.json()).then(d => { Object.assign(data, d); }).catch(() => {});
+const applyState = () => { Object.assign(E.st, st); E.events = VE.previewEvents(st); };
+
+const seek = document.getElementById('seek'), play = document.getElementById('play'), snd = document.getElementById('snd');
+function loop() { applyState(); try { E.draw(vid.currentTime || 0); } catch (e) { console.error(e); } seek.value = Math.round((vid.currentTime || 0) * 100); requestAnimationFrame(loop); }
+play.onclick = () => { if (vid.paused) { vid.play().catch(() => {}); play.textContent = '暂停'; } else { vid.pause(); play.textContent = '播放'; } };
+seek.oninput = () => { vid.currentTime = seek.value / 100; };
+snd.onclick = () => { vid.muted = !vid.muted; snd.setAttribute('aria-pressed', String(!vid.muted)); if (!vid.muted) vid.play().catch(() => {}); };
+document.querySelectorAll('[data-jump]').forEach(b => b.onclick = () => { vid.currentTime = +b.dataset.jump; });
+
+const stylesEl = document.getElementById('styles'), fontsEl = document.getElementById('fonts'), colorsEl = document.getElementById('colors'), fieldsEl = document.getElementById('fields');
+stylesEl.innerHTML = Object.entries(VE.STYLES).sort().map(([k, s]) => `<button data-style="${k}" aria-pressed="false">${s.name}<small>${SDESC[k] || ''}</small></button>`).join('');
+const fontCss = {serif_black: '900 22px "Noto Serif SC","Noto Serif CJK SC"', serif_italic: 'italic 700 24px "VE Crimson"', playfair_italic: 'italic 700 22px "VE Playfair"', sans_black: '900 22px "Noto Sans SC","Noto Sans CJK SC"', montserrat: '900 20px "VE Montserrat"', montserrat_italic: 'italic 900 20px "VE Montserrat"', anton: '400 24px "VE Anton"', mono: '700 20px "VE Mono"'};
+fontsEl.innerHTML = Object.entries(VE.FONTS).map(([k, f]) => `<button class="font" data-font="${k}" aria-pressed="false"><b style='font:${fontCss[k]}'>${SAMPLE[k]}</b><small>${f.name}</small></button>`).join('');
+colorsEl.innerHTML = COLORS.map(([c, n]) => `<button class="sw" data-color="${c}" style="background:${c}" aria-label="${n}" title="${n}" aria-pressed="false"></button>`).join('') + `<input type="color" id="custom" aria-label="自选颜色">`;
+fieldsEl.innerHTML = FIELDS.map(([k, n]) => `<div><label class="f" for="t-${k}">${n}</label><input type="text" id="t-${k}" data-k="${k}"></div>`).join('');
+function sync() {
+  stylesEl.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.style === st.style)));
+  fontsEl.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.font === st.font)));
+  colorsEl.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.color.toLowerCase() === st.accent.toLowerCase())));
+  document.getElementById('custom').value = st.accent;
+  ['glow', 'stroke', 'subs'].forEach(k => document.getElementById(k).setAttribute('aria-pressed', String(st[k])));
+  fieldsEl.querySelectorAll('input').forEach(i => { if (document.activeElement !== i) i.value = st[i.dataset.k] || ''; });
+  save();
+}
+stylesEl.onclick = e => { const b = e.target.closest('[data-style]'); if (!b) return; const s = VE.STYLES[b.dataset.style]; st.style = b.dataset.style; st.font = s.font; st.accent = s.accent; sync(); vid.currentTime = 0; vid.play().catch(() => {}); };
+fontsEl.onclick = e => { const b = e.target.closest('[data-font]'); if (b) { st.font = b.dataset.font; sync(); } };
+colorsEl.onclick = e => { const b = e.target.closest('[data-color]'); if (b) { st.accent = b.dataset.color; sync(); } };
+document.getElementById('custom').oninput = e => { st.accent = e.target.value; sync(); };
+['glow', 'stroke', 'subs'].forEach(k => document.getElementById(k).onclick = () => { st[k] = !st[k]; sync(); });
+fieldsEl.oninput = e => { const i = e.target.closest('input[data-k]'); if (i) { st[i.dataset.k] = i.value; save(); } };
+document.getElementById('done').onclick = async () => {
+  const s = VE.STYLES[st.style], f = VE.FONTS[st.font];
+  const line = `风格 ${s.name} · 字体 ${st.font}（${f.name}） · 重点色 ${st.accent.toUpperCase()} · 发光 ${st.glow ? '开' : '关'} · 黑边 ${st.stroke ? '开' : '关'} · 字幕 ${st.subs ? '关键词 + 底部完整字幕' : '只放关键词'} · 留言关键词 ${st.cta}`;
+  const o = document.getElementById('out-line'); o.style.display = 'block';
+  try { await navigator.clipboard.writeText(line); o.textContent = '已复制：' + line; } catch (e) { o.textContent = line + '（请手动复制这一行）'; }
+};
+sync();
+['900 40px "Noto Serif SC"', '900 40px "Noto Sans SC"', '500 20px "Noto Sans SC"'].forEach(f => document.fonts.load(f, '拍卖赢家').catch(() => {}));
+vid.play().catch(() => { play.textContent = '播放'; });
+requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>

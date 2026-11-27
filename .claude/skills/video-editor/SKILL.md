@@ -10,7 +10,8 @@ description: 短视频剪辑师（IG Reels / TikTok / FB 竖屏 9:16）。用于
 ## 文件
 - `references/styles.md` — 9 个风格模板（A–I），每个含配色/字体/特效/转场/音效/结构
 - `picker/picker.html` — **风格/字体/颜色/字幕 可视化选择器**（用 Visualizer 的 show_widget 原样显示，用户点选后答案会以一行文字回来）
-- `scripts/neon_ribbon/` — 风格 I 的 Python 渲染管线（抠像、3D 飘带、关键词、卡片、圆形模式、音频条），用法见其 README
+- `scripts/neon_ribbon/prepare.py` — 每条影片先跑：抠像、人脸位置、音量、按停顿切句
+- `scripts/web/` — **A–I 九种风格的引擎**（engine.js）：即时预览网页 + 无头 Chrome 逐帧出 1080×1920 成片，用法见其 README
 - `references/toolkit.md` — 通用工具箱：字幕、特效、转场、镜头运动、音效、音乐、混音、灯光、调色、输出规格
 - `references/sources.md` — 训练用的参考视频清单和每条学到什么
 
@@ -50,7 +51,7 @@ description: 短视频剪辑师（IG Reels / TikTok / FB 竖屏 9:16）。用于
 1. **收素材**：确认有哪些东西——口播视频、B-roll、照片、logo、讲稿、CTA 关键词、品牌色/字体、平台、目标时长。缺了就列出来问。
 2. **判断风格 → 显示可视化选择器**：读素材 + 讲稿，用下表先想好推荐的风格，然后**用 show_widget 显示 `picker/picker.html`**（原样贴进去；把推荐风格那张卡的副标题改成「推荐」）。用户点选 风格 / 字体 / 重点色 / 字幕 / 贴讲稿 → 答案以一行文字回来，按它剪。用户点 Skip 或选「你帮我选」就直接用推荐。没有 Visualizer 的环境（例如终端）就用文字列出选项让用户回答。
    - 字体答案对应 spec 的 `look.font`：`serif_black` 粗宋体 / `serif_italic` 衬线斜体 / `sans_black` 粗黑体 / `montserrat` / `anton`；颜色对应 `look.accent`；选「蓝色发光」时加 `look.glow: true`。
-   - **即时预览器（风格 I）**：用户想"点了马上看到效果"时，跑 `scripts/neon_ribbon/prepare.py` → `scripts/neon_ribbon/preview/make_preview.py`，把 `preview/` 里 3 个文件（index.html、clip.mp4、data.json）用 publish_files 发成一个 artifact。用户在网页上点字体/颜色/发光/字幕、直接改画面上的字，按「就用这个，复制设定」把一行设定贴回 chat → 照设定渲全片。网页上改的字（关键词、卡片）也要用进 spec。
+   - **即时预览器（风格 A–I 全部）**：跑 `scripts/neon_ribbon/prepare.py`（抠像/人脸/音量/切句）→ `scripts/web/make_preview.py`，把 `preview/` 里全部文件（index.html、engine.js、clip.mp4、data.json、fonts/）用 publish_files 发成一个 artifact。用户在网页上点风格 A–I、字体、颜色、发光/黑边/字幕，直接改画面上的字，按「就用这个，复制设定」把一行设定贴回 chat。
    - **先出样片再出全片**：先渲 8–10 秒样片（或几张静帧）给用户确认，确认后才渲全片。
 
    | 内容类型 | 推荐 |
@@ -69,7 +70,7 @@ description: 短视频剪辑师（IG Reels / TikTok / FB 竖屏 9:16）。用于
    - 时间轴分段（0–1s 钩子 / 主体分段 / 结尾 CTA）
    - 每段：字幕文字 + 字体 + 动画、特效、转场、音效、音乐
    - 配色（最多 3 个主色）、调色方向
-4. **剪**：用户在 CapCut/Premiere/AE 剪时，给逐步操作说明；在本环境剪时，用 ffmpeg / Python（MoviePy/Pillow）等渲染，输出 1080×1920。风格 I 直接用 `scripts/neon_ribbon/`。
+4. **剪**：用户在 CapCut/Premiere/AE 剪时，给逐步操作说明；在本环境剪时，用 ffmpeg / Python（MoviePy/Pillow）等渲染，输出 1080×1920。**A–I 九种风格的成片都用 `scripts/web/render_web.py`**（和预览网页同一个 engine.js，预览看到什么成片就是什么）：按讲稿和 `phrases.json` 写 spec.json（`look` = 用户贴回的设定；`events` = 多组 hook / cards / feature / outro 和每句 `sub`），先渲 8–10 秒样片，确认后渲全片（约 5 帧/秒，50 秒影片约 5 分钟）。旧的 `scripts/neon_ribbon/render.py`（Python 版风格 I）保留作备用。
    - 本环境转不了文字时（HuggingFace 被墙、faster-whisper 下不了模型），用选择器里用户贴的讲稿；没贴就请用户贴，同时可以先渲样片。
 5. **自检**（交付前逐条检查）：
    - 0–1 秒有钩子吗？

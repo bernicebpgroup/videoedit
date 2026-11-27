@@ -1,10 +1,9 @@
-"""Build the live preview page's media from a prepare.py work dir.
+"""Build the live preview page (styles A–I) for a clip.
 
-Usage (inside the work dir, after prepare.py):  python3 make_preview.py [start_sec] [dur_sec]
-Writes ./preview/{index.html, clip.mp4, data.json}; publish those 3 files as one artifact
-(publish_files: index.html, clip.mp4, data.json). clip.mp4 = colour | person-matte side by side,
-the page composites them in a canvas so the ribbon can pass behind the head.
-The page's timeline (keyword 0.6s, cards 2.8s, circle 5.6s, bars 8.9s) assumes ~11s.
+Run inside a prepare.py work dir:  python3 make_preview.py [start_sec] [dur_sec]
+Writes ./preview/ : index.html, engine.js, fonts/*, clip.mp4 (colour|matte side by side, 540x960 each), data.json.
+Publish every file in preview/ as ONE artifact with publish_files (keep the fonts/ folder path).
+The preview timeline (hook 0.6s, cards 2.8s, feature 5.6s, outro 8.9s) assumes ~11s.
 """
 import sys, os, json, shutil, subprocess
 import numpy as np
@@ -27,5 +26,6 @@ fx = np.nan_to_num(faces[:, 0], nan=np.nanmean(faces[:, 0])); fy = np.nan_to_num
 i0 = int(T0 * 2); i1 = i0 + int(DUR * 2) + 2
 json.dump({'fps': 30, 'dur': n / 30, 'face': [[round(float(a) / 2, 1), round(float(b) / 2, 1)] for a, b in zip(fx[i0:i1], fy[i0:i1])],
            'rms': [round(float(x), 3) for x in rms]}, open('preview/data.json', 'w'))
-shutil.copy(os.path.join(here, 'index.html'), 'preview/index.html')
-print('preview/ ready:', os.listdir('preview'))
+for f in ('index.html', 'engine.js'): shutil.copy(os.path.join(here, f), 'preview')
+shutil.copytree(os.path.join(here, 'fonts'), 'preview/fonts', dirs_exist_ok=True)
+print('preview/ ready:', sorted(os.listdir('preview')))
