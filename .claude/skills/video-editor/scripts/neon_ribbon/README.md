@@ -13,6 +13,12 @@ python3 <skill>/scripts/neon_ribbon/render.py spec.json out.mp4 [T0] [T1]   # ~6
 - `render.py`：读 spec 渲染；`T0 T1` 可只渲一段做样片。spec 里 `snaps` 列出的秒数会存成 `snap_XXXXX.jpg` 方便自检。
 - `engine.py`：所有图形元件（飘带、关键词、胶片框、卡片、图标、标签、圆形模式、音频条）。
 
+## 即时预览网页
+```bash
+python3 <skill>/scripts/neon_ribbon/preview/make_preview.py [开始秒] [长度秒]   # 在 prepare.py 的工作目录里跑
+```
+产生 `preview/index.html + clip.mp4 + data.json`，用 publish_files 发成 artifact。网页在浏览器里即时画效果（canvas）：抠像让飘带从头后穿过、字体/颜色/发光/黑边/字幕可点、画面上的字可改，最后一键复制设定。A–H 风格还没有预览。
+
 ## spec.json 字段
 | 字段 | 格式 | 说明 |
 |---|---|---|

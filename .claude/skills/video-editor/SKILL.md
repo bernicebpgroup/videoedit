@@ -50,6 +50,7 @@ description: 短视频剪辑师（IG Reels / TikTok / FB 竖屏 9:16）。用于
 1. **收素材**：确认有哪些东西——口播视频、B-roll、照片、logo、讲稿、CTA 关键词、品牌色/字体、平台、目标时长。缺了就列出来问。
 2. **判断风格 → 显示可视化选择器**：读素材 + 讲稿，用下表先想好推荐的风格，然后**用 show_widget 显示 `picker/picker.html`**（原样贴进去；把推荐风格那张卡的副标题改成「推荐」）。用户点选 风格 / 字体 / 重点色 / 字幕 / 贴讲稿 → 答案以一行文字回来，按它剪。用户点 Skip 或选「你帮我选」就直接用推荐。没有 Visualizer 的环境（例如终端）就用文字列出选项让用户回答。
    - 字体答案对应 spec 的 `look.font`：`serif_black` 粗宋体 / `serif_italic` 衬线斜体 / `sans_black` 粗黑体 / `montserrat` / `anton`；颜色对应 `look.accent`；选「蓝色发光」时加 `look.glow: true`。
+   - **即时预览器（风格 I）**：用户想"点了马上看到效果"时，跑 `scripts/neon_ribbon/prepare.py` → `scripts/neon_ribbon/preview/make_preview.py`，把 `preview/` 里 3 个文件（index.html、clip.mp4、data.json）用 publish_files 发成一个 artifact。用户在网页上点字体/颜色/发光/字幕、直接改画面上的字，按「就用这个，复制设定」把一行设定贴回 chat → 照设定渲全片。网页上改的字（关键词、卡片）也要用进 spec。
    - **先出样片再出全片**：先渲 8–10 秒样片（或几张静帧）给用户确认，确认后才渲全片。
 
    | 内容类型 | 推荐 |
