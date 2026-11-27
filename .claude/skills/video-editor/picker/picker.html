@@ -1,0 +1,105 @@
+<style>@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&family=Noto+Sans+SC:wght@900&family=Crimson+Text:ital,wght@1,700&family=Montserrat:wght@900&family=Anton&display=swap');</style>
+<form class="elicit">
+  <div class="elicit-header">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M11.586 2a1.5 1.5 0 0 1 1.06.44l2.914 2.914a1.5 1.5 0 0 1 .44 1.06V16.5a1.5 1.5 0 0 1-1.5 1.5h-9a1.5 1.5 0 0 1-1.492-1.347L4 16.5v-13A1.5 1.5 0 0 1 5.5 2zM5.5 3a.5.5 0 0 0-.5.5v13a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V7h-2.5A1.5 1.5 0 0 1 11 5.5V3zm7.04 10.304a.5.5 0 0 1 .92.392c-.295.69-.871 1.304-1.66 1.304-.487 0-.892-.234-1.2-.574-.309.34-.713.574-1.2.574-.486 0-.892-.233-1.2-.574-.31.34-.714.574-1.2.574a.5.5 0 0 1 0-1c.212 0 .52-.18.74-.696l.034-.067a.5.5 0 0 1 .886.067c.221.516.528.696.74.696.213 0 .52-.18.74-.696l.035-.067a.5.5 0 0 1 .885.067c.22.516.527.696.74.696s.519-.18.74-.696m0-4a.5.5 0 0 1 .92.392c-.295.69-.871 1.304-1.66 1.304-.487 0-.892-.234-1.2-.574-.309.34-.713.574-1.2.574-.486 0-.892-.233-1.2-.574-.31.34-.714.574-1.2.574a.5.5 0 0 1 0-1c.212 0 .52-.18.74-.696l.034-.067a.5.5 0 0 1 .886.067c.221.516.528.696.74.696.213 0 .52-.18.74-.696l.035-.067a.5.5 0 0 1 .885.067c.22.516.527.696.74.696s.519-.18.74-.696M12 5.5a.5.5 0 0 0 .5.5h2.293L12 3.207z"/></svg>
+    <span>Video details</span>
+  </div>
+  <div class="elicit-body">
+    <div class="elicit-group">
+      <label class="elicit-question">这条影片要用哪一种风格？</label>
+      <div class="elicit-pills" data-name="style" data-multi="false">
+        <button type="button" class="elicit-pill" data-value="A AI 界面演示风" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <svg width="48" height="72" viewBox="0 0 48 72"><rect x="1" y="1" width="46" height="70" rx="6" fill="#1f2328"/><rect x="6" y="10" width="28" height="7" rx="3.5" fill="#cfd4dc"/><rect x="14" y="22" width="28" height="7" rx="3.5" fill="#d4f23a"/><rect x="6" y="36" width="36" height="22" rx="3" fill="#3a4048"/><path d="M10 44l4 3-4 3" stroke="#d4f23a" stroke-width="1.6" fill="none"/></svg>
+          <span style="font-size:13px;font-weight:500">A AI 界面</span><span style="font-size:11px;color:var(--text-muted)">指令→成片</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="B 杂志衬线风" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <svg width="48" height="72" viewBox="0 0 48 72"><rect x="1" y="1" width="46" height="70" rx="6" fill="#f8f5dc"/><rect x="1" y="1" width="16" height="70" rx="6" fill="#445a3f"/><text x="30" y="44" font-family="Georgia,serif" font-style="italic" font-size="20" fill="#445a3f" text-anchor="middle">Aa</text></svg>
+          <span style="font-size:13px;font-weight:500">B 杂志衬线</span><span style="font-size:11px;color:var(--text-muted)">优雅干货</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="C 高端品牌对比风" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <svg width="48" height="72" viewBox="0 0 48 72"><rect x="1" y="1" width="46" height="70" rx="6" fill="#d9d4cc"/><rect x="1" y="1" width="23" height="70" rx="6" fill="#8a847a"/><line x1="24" y1="1" x2="24" y2="71" stroke="#fff" stroke-width="2"/><text x="12" y="66" font-size="6" fill="#fff" text-anchor="middle">BEFORE</text><text x="36" y="66" font-size="6" fill="#3a352d" text-anchor="middle">AFTER</text></svg>
+          <span style="font-size:13px;font-weight:500">C 高端对比</span><span style="font-size:11px;color:var(--text-muted)">前后对比</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="D 清单教学风" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <svg width="48" height="72" viewBox="0 0 48 72"><rect x="1" y="1" width="46" height="70" rx="6" fill="#eef0f3"/><g fill="#378add"><circle cx="11" cy="20" r="4"/><circle cx="11" cy="36" r="4"/><circle cx="11" cy="52" r="4"/></g><g fill="#888780"><rect x="19" y="18" width="22" height="4" rx="2"/><rect x="19" y="34" width="18" height="4" rx="2"/><rect x="19" y="50" width="20" height="4" rx="2"/></g></svg>
+          <span style="font-size:13px;font-weight:500">D 清单教学</span><span style="font-size:11px;color:var(--text-muted)">N 个重点</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="E 极简口播" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <svg width="48" height="72" viewBox="0 0 48 72"><rect x="1" y="1" width="46" height="70" rx="6" fill="#d3d1c7"/><circle cx="24" cy="28" r="9" fill="#5f5e5a"/><path d="M8 71c0-14 7-22 16-22s16 8 16 22z" fill="#5f5e5a"/><rect x="9" y="56" width="30" height="6" rx="2" fill="#fff"/></svg>
+          <span style="font-size:13px;font-weight:500">E 极简口播</span><span style="font-size:11px;color:var(--text-muted)">干净字幕</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="F 动态排版潮流风" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <svg width="48" height="72" viewBox="0 0 48 72"><rect x="1" y="1" width="46" height="70" rx="6" fill="#ffffff" stroke="#d3d1c7"/><text x="24" y="34" font-family="monospace" font-size="11" fill="#2c2c2a" text-anchor="middle">r#x?t</text><rect x="12" y="42" width="24" height="9" fill="#d4ff00" transform="rotate(-7 24 46)"/><text x="24" y="49" font-size="6" fill="#173404" text-anchor="middle" transform="rotate(-7 24 46)">edits</text></svg>
+          <span style="font-size:13px;font-weight:500">F 动态排版</span><span style="font-size:11px;color:var(--text-muted)">潮流设计</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="G 暖色套框展示风" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <svg width="48" height="72" viewBox="0 0 48 72"><rect x="1" y="1" width="46" height="70" rx="6" fill="#f5e6cf"/><rect x="9" y="12" width="30" height="46" rx="4" fill="#ba7517"/><rect x="13" y="16" width="22" height="38" rx="3" fill="#fac775"/><circle cx="24" cy="30" r="5" fill="#854f0b"/></svg>
+          <span style="font-size:13px;font-weight:500">G 暖色套框</span><span style="font-size:11px;color:var(--text-muted)">放大放小</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="H 高密度特效口播" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <svg width="48" height="72" viewBox="0 0 48 72"><rect x="1" y="1" width="46" height="70" rx="6" fill="#85b7eb"/><text x="24" y="34" font-family="sans-serif" font-weight="900" font-size="17" fill="#fff" text-anchor="middle">BIG</text><circle cx="24" cy="38" r="8" fill="#0c447c"/><path d="M10 71c0-13 6-20 14-20s14 7 14 20z" fill="#0c447c"/><path d="M6 12l4 3M42 10l-4 4M40 52l4 2" stroke="#fff" stroke-width="1.5"/></svg>
+          <span style="font-size:13px;font-weight:500">H 高密度特效</span><span style="font-size:11px;color:var(--text-muted)">字在人后</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="I 霓虹飘带成片风" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <svg width="48" height="72" viewBox="0 0 48 72"><rect x="1" y="1" width="46" height="70" rx="6" fill="#eef0e6"/><circle cx="24" cy="26" r="8" fill="#444441"/><path d="M10 71c0-15 6-24 14-24s14 9 14 24z" fill="#444441"/><path d="M6 4c22 10 30 18 8 30s4 26 30 34" stroke="#c6e33a" stroke-width="4" fill="none"/><rect x="8" y="46" width="32" height="10" rx="2" fill="#1b1d19"/><text x="24" y="54" font-family="Georgia,serif" font-style="italic" font-size="8" fill="#d4f23a" text-anchor="middle">editors</text></svg>
+          <span style="font-size:13px;font-weight:500">I 霓虹飘带</span><span style="font-size:11px;color:var(--text-muted)">3D 飘带</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="你帮我选" style="width:120px;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <i class="ti ti-sparkles" style="font-size:22px" aria-hidden="true"></i>
+          <span style="font-size:13px;font-weight:500">你帮我选</span><span style="font-size:11px;color:var(--text-muted)">按内容推荐</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="elicit-group">
+      <label class="elicit-question">关键词大字要用哪一种字体？</label>
+      <div class="elicit-pills" data-name="font" data-multi="false">
+        <button type="button" class="elicit-pill" data-value="serif_black 粗宋体" style="border-radius:12px;padding:12px 16px;min-width:190px;text-align:left;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <span style="font-family:'Noto Serif SC',serif;font-weight:900;font-size:26px;line-height:1.2">拍卖赢家</span><br><span style="font-size:11px;color:var(--text-muted)">粗宋体 · 团队默认</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="serif_italic 衬线斜体" style="border-radius:12px;padding:12px 16px;min-width:190px;text-align:left;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <span style="font-family:'Crimson Text',serif;font-style:italic;font-weight:700;font-size:28px;line-height:1.1">editors</span> <span style="font-family:'Noto Serif SC',serif;font-weight:900;font-size:22px;display:inline-block;transform:skewX(-12deg)">赢家</span><br><span style="font-size:11px;color:var(--text-muted)">衬线斜体 · 参考 Reel 原版</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="sans_black 粗黑体" style="border-radius:12px;padding:12px 16px;min-width:190px;text-align:left;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <span style="font-family:'Noto Sans SC',sans-serif;font-weight:900;font-size:26px;line-height:1.2">拍卖赢家</span><br><span style="font-size:11px;color:var(--text-muted)">粗黑体 · 醒目直接</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="montserrat Montserrat Black" style="border-radius:12px;padding:12px 16px;min-width:190px;text-align:left;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <span style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;line-height:1.2">RM 380K</span><br><span style="font-size:11px;color:var(--text-muted)">Montserrat · 数字/英文</span>
+        </button>
+        <button type="button" class="elicit-pill" data-value="anton Anton" style="border-radius:12px;padding:12px 16px;min-width:190px;text-align:left;box-shadow:0 1px 2px rgba(0,0,0,0.04)">
+          <span style="font-family:'Anton',sans-serif;font-size:28px;line-height:1.15;letter-spacing:0.5px">AUCTION</span><br><span style="font-size:11px;color:var(--text-muted)">Anton · 窄高标题</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="elicit-group">
+      <label class="elicit-question">重点颜色要哪一个？</label>
+      <div class="elicit-pills" data-name="accent" data-multi="false">
+        <button type="button" class="elicit-pill" data-value="#D4F23A 荧光黄绿" style="border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,0.04)"><span style="width:22px;height:22px;border-radius:50%;background:#D4F23A;display:inline-block"></span><span style="font-size:13px">荧光黄绿</span></button>
+        <button type="button" class="elicit-pill" data-value="#3B82F6 蓝色发光" style="border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,0.04)"><span style="width:22px;height:22px;border-radius:50%;background:#3B82F6;display:inline-block"></span><span style="font-size:13px">蓝色发光</span></button>
+        <button type="button" class="elicit-pill" data-value="#312F92 品牌深蓝" style="border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,0.04)"><span style="width:22px;height:22px;border-radius:50%;background:#312F92;display:inline-block"></span><span style="font-size:13px">品牌深蓝</span></button>
+        <button type="button" class="elicit-pill" data-value="#C9A227 金色" style="border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,0.04)"><span style="width:22px;height:22px;border-radius:50%;background:#C9A227;display:inline-block"></span><span style="font-size:13px">金色</span></button>
+        <button type="button" class="elicit-pill" data-value="#FF6B4A 珊瑚橘" style="border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,0.04)"><span style="width:22px;height:22px;border-radius:50%;background:#FF6B4A;display:inline-block"></span><span style="font-size:13px">珊瑚橘</span></button>
+        <button type="button" class="elicit-pill" data-value="Other" data-other>其他颜色</button>
+      </div>
+      <input type="text" class="elicit-other" data-for="accent" placeholder="#FF3366 或 描述颜色" hidden>
+    </div>
+
+    <div class="elicit-group">
+      <label class="elicit-question">字幕要怎样？</label>
+      <div class="elicit-pills" data-name="subtitles" data-multi="false">
+        <button type="button" class="elicit-pill" data-value="只放关键词大字">只放关键词大字</button>
+        <button type="button" class="elicit-pill" data-value="关键词 + 底部完整字幕">关键词 + 底部完整字幕</button>
+      </div>
+    </div>
+
+    <div class="elicit-group">
+      <label class="elicit-question">口播稿和结尾 CTA（没有就留空，我先听或先问你）</label>
+      <textarea class="elicit-textarea" data-name="script" placeholder="逐句贴上口播稿；想放大的词用【】标出来。结尾 CTA 例如：留言「拍卖」拿资料"></textarea>
+    </div>
+  </div>
+  <div class="elicit-footer">
+    <button type="button" class="elicit-skip">Skip</button>
+    <button type="button" class="elicit-submit">Continue</button>
+  </div>
+</form>
