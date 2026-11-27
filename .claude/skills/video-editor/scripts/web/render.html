@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>render</title>
+<style>
+@font-face{font-family:"VE Playfair";font-weight:700;font-style:normal;src:url(fonts/playfair-display-latin-700-normal.woff2)}
+@font-face{font-family:"VE Playfair";font-weight:900;font-style:normal;src:url(fonts/playfair-display-latin-900-normal.woff2)}
+@font-face{font-family:"VE Playfair";font-weight:700;font-style:italic;src:url(fonts/playfair-display-latin-700-italic.woff2)}
+@font-face{font-family:"VE Playfair";font-weight:400;font-style:italic;src:url(fonts/playfair-display-latin-400-italic.woff2)}
+@font-face{font-family:"VE Crimson";font-weight:700;font-style:italic;src:url(fonts/crimson-text-latin-700-italic.woff2)}
+@font-face{font-family:"VE Montserrat";font-weight:900;font-style:normal;src:url(fonts/montserrat-latin-900-normal.woff2)}
+@font-face{font-family:"VE Montserrat";font-weight:900;font-style:italic;src:url(fonts/montserrat-latin-900-italic.woff2)}
+@font-face{font-family:"VE Montserrat";font-weight:300;font-style:normal;src:url(fonts/montserrat-latin-300-normal.woff2)}
+@font-face{font-family:"VE Montserrat";font-weight:300;font-style:italic;src:url(fonts/montserrat-latin-300-normal.woff2)}
+@font-face{font-family:"VE Anton";src:url(fonts/anton-latin-400-normal.woff2)}
+@font-face{font-family:"VE Mono";font-weight:700;src:url(fonts/space-mono-latin-700-normal.woff2)}
+@font-face{font-family:"VE Inter";font-weight:500;src:url(fonts/inter-latin-500-normal.woff2)}
+@font-face{font-family:"VE Inter";font-weight:600;src:url(fonts/inter-latin-600-normal.woff2)}
+@font-face{font-family:"VE Inter";font-weight:800;src:url(fonts/inter-latin-800-normal.woff2)}
+@font-face{font-family:"VE Inter";font-weight:300;src:url(fonts/inter-latin-500-normal.woff2)}
+body{margin:0;background:#000}
+</style></head>
+<body>
+<canvas id="out"></canvas>
+<video id="vid" src="full.mp4" muted playsinline preload="auto"></video>
+<script src="engine.js"></script>
+<script>
+(async () => {
+  const spec = await (await fetch('spec.json')).json();
+  const data = await (await fetch('data.json')).json();
+  const vid = document.getElementById('vid'), out = document.getElementById('out');
+  const E = VE.Engine(out, vid, data, {scale: 2});
+  Object.assign(E.st, spec.look); E.events = spec.events;
+  const fams = ['900 40px "VE Montserrat"', 'italic 900 40px "VE Montserrat"', '300 40px "VE Montserrat"', 'italic 700 40px "VE Playfair"', '700 40px "VE Playfair"', '900 40px "VE Playfair"', 'italic 400 40px "VE Playfair"', 'italic 700 40px "VE Crimson"', '40px "VE Anton"', '700 40px "VE Mono"', '500 40px "VE Inter"', '600 40px "VE Inter"', '800 40px "VE Inter"'];
+  await Promise.all(fams.map(f => document.fonts.load(f, 'Ab1').catch(() => {})));
+  await new Promise(r => { if (vid.readyState >= 2) r(); else vid.addEventListener('loadeddata', r, {once: true}); });
+  window.renderAt = async (t) => {
+    await new Promise(r => { vid.addEventListener('seeked', r, {once: true}); vid.currentTime = t; });
+    E.draw(t);
+    return out.toDataURL('image/jpeg', 0.93);
+  };
+  window.READY = true;
+})();
+</script>
+</body></html>
